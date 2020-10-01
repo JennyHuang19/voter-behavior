@@ -1,0 +1,14 @@
+---
+title: "Project proposal"
+author: "Team Name: Team member 1, Team member 2, Team member 3, Team member 4"
+date: "Update date"
+output: pdf_document
+---
+
+### Section 1. Introduction
+
+### Section 2. Data description
+
+### Section 3. Glimpse of data 
+
+
