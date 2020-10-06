@@ -1,14 +1,54 @@
 ---
 title: "Project proposal"
-author: "Team Name: Team member 1, Team member 2, Team member 3, Team member 4"
-date: "Update date"
+author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
+date: "6 October 2020"
 output: pdf_document
 ---
+
+```{r setup, echo = F}
+knitr::opts_chunk$set(warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center")
+```
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(broom)
+library(patchwork)
+```
+
+```{r data}
+spotify <- read_csv("data/spotify_songs.csv")
+```
 
 ### Section 1. Introduction
 
 ### Section 2. Data description
 
+```{r obs}
+observations <- as.tibble(count(spotify)) %>%
+  mutate(variables = ncol(spotify))
+observations %>%
+  kable()
+```
+In our data set `spotify`, there are 32,833 observations, each of which is a song
+on Spotify. There are 23 variables in the data set, ranging from the song's release
+date to its danceability. 
+
+```{r response}
+spotify[,c("playlist_genre", "playlist_subgenre")] 
+```
+The primary response variable of our regression analysis will be 
+`playlist_genre`. Using the other characteristic variables of the songs
+('key', 'loudness', 'acousticness, etc.), we will predict the genre of the 
+playlist each song would be placed in. Depending on the criteria of the project,
+we may also extend our analysis to predict the subgenre of the playlist a
+song is in based off its characteristics.
+
 ### Section 3. Glimpse of data 
+
+```{r glimpse}
+glimpse(spotify)
+```
 
 
