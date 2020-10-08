@@ -22,6 +22,10 @@ spotify <- read_csv("data/spotify_songs.csv")
 ```
 
 ### Section 1. Introduction
+  With streaming services dominating the music industry in today’s world, Spotify has become a popular platform for individuals to listen to an unlimited variety of songs. In our study, we are investigating different characteristics of about 32,000 songs on Spotify. The variables of concern pertain to logistical aspects of the song (release date, playlist genre, etc.) as well as technical qualities of the song itself (tempo, rhythm, energy, loudness, etc.). It proves difficult to determine or forecast a given song’s popularity through mere anecdotal experience or personal opinion; by investigating both qualitative and quantitative aspects of Spotify songs, we hope to gain a more precise understanding of what the common characteristics are that render a song popular. Motivation for our research question draws from how the nuances of particular songs can affect their popularity, as well as how audio features are perceived as appealing and what makes a song popular outside of its genre. In the article “Understanding + classifying genres using Spotify audio features,” written by data scientist Kayla Pavlik, quantifiable ratings are discussed that differentiate audible components of a song [1]. We hope to include quantifiable characteristics of audible features to see if there are notable trends of more popular songs, or if traits such as genre and artists prove to be a more reliable indicator of a song’s popularity as suggested by the article “Visualized: Can We Quantify the Most Popular Music?” by Madeleine Picard [2].
+
+We are interested in finding out about which audio features of a song on Spotify predict its popularity. We will be using the `track_popularity` as the response variable, a numerical score that ranges 0 to 100, with 100 being the best score. We will use numerical predictor variables and categorical predictor variables to predict track popularity [3]. Of the categorical variables, we believe that `playlist_genre` will be a top predictor of `track_popularity`, as rock, pop, and country songs are highly popular among listeners [4]. For our numerical variables, we hypothesize that songs that score high in danceability and energy tend to be more popular based on our experiences with popular music.
+
 
 ### Section 2. Data description
 
@@ -31,19 +35,48 @@ observations <- as.tibble(count(spotify)) %>%
 observations %>%
   kable()
 ```
-In our data set `spotify`, there are 32,833 observations, each of which is a song
+In our data set `spotify`, there are 32,833 observations, each of which is a song/track
 on Spotify. There are 23 variables in the data set, ranging from the song's release
 date to its danceability. 
 
 ```{r response}
-spotify[,c("playlist_genre", "playlist_subgenre")] 
+spotify[,c("track_popularity", "playlist_genre")] %>%
+  arrange(desc(track_popularity)) %>%
+  slice(1:10) %>%
+  kable()
 ```
 The primary response variable of our regression analysis will be 
-`playlist_genre`. Using the other characteristic variables of the songs
-('key', 'loudness', 'acousticness, etc.), we will predict the genre of the 
-playlist each song would be placed in. Depending on the criteria of the project,
-we may also extend our analysis to predict the subgenre of the playlist a
-song is in based off its characteristics.
+`track_popularity`. The variable is numerical and ranges from values of 0 (least popular)
+to 100 (most popular). A distribution of `track_popularity` can be seen below.
+
+```{r}
+
+ggplot(data=spotify, aes(x=track_popularity)) +
+  geom_histogram(binwidth = 6) +
+  labs(title= "Distribution of Track Popularity", x= "Track Popularity", y = "Count")
+
+spotify %>%
+  summarise(min = min(track_popularity), 
+            q1 = quantile(track_popularity, probs = .25), 
+            median = median(track_popularity), 
+            q3 = quantile(track_popularity, probs = .75), 
+            max = max(track_popularity), 
+            iqr = q3-q1, 
+            mean = mean(track_popularity), 
+            std_dev = sd(track_popularity)
+            ) %>%
+  kable()
+
+spotify %>%
+count(track_popularity == 0)
+```
+The distribution of `track_popularity` is bimodal and centered at a mean of 42.48.
+The distribution has a standard deviation of 24.98, which measures its spread. There are
+2703 songs that have a `track_popularity` of 0.
+
+To predict the popularity of a song, we will consider the variables that describe the energy, loudness (measured in decibels), danceability, speechiness, duration (measured in milliseconds), mode, acousticness, valence, tempo (beats per minute), and playlist genre of each track observation. Energy, danceability, speechiness, acousticness, and valence are all measured on a scale from 0 to 1. These predictor variables are sourced from Spotify’s application programming interface (API) available online [5]. Energy is a variable that describes the intensity of a track, where 0 describes low-energy songs and 1 describes high-energy songs [5]. Danceability is defined as “how suitable a track is for dancing based on a combination of musical elements,” where 0 describes songs that are least danceable and 1 describes songs that are most danceable [5]. Speechiness describes the amount of words in a track, where tracks that are fully instrumental would have a value closer to 0 and tracks that are fully spoken word (such as a podcast) would have a value closer to 1 [5]. Mode is a measurement of the major or minor key in a track, where 1 is major and 0 is minor [5]. Acousticness measures confidence of whether a track is acoustic, where a track with a value of 1 would have “high confidence” of being acoustic (not electronic), and a song with a value of 0 would have low confidence of being acoustic [5]. Valence is a measure of the positivity of a track, where 0 describes songs that are low-valence (sad, angry), while 1 describes more positive or happy songs [5]. 
+
+These data were collected by Spotify’s developers and data scientists as part of Spotify’s API. The dataset consists of audio features for different tracks on Spotify that have been measured by Spotify analytics for each available track and made publicly available on the Spotify API [6]. The latest song included in this dataset was released January 29th, 2020 [3]. Kaylin Pavlik published an analysis of these data using the “spotifyr” package to classify genre of tracks as part of the Tidy Tuesday project that made these data available on GitHub [3,6]. 
 
 ### Section 3. Glimpse of data 
 
@@ -51,4 +84,12 @@ song is in based off its characteristics.
 glimpse(spotify)
 ```
 
-
+## References
+[1] https://www.kaylinpavlik.com/classifying-songs-genres/
+[2] https://www.displayr.com/most-popular-music/
+[3] https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-01-21
+[4] https://www.statista.com/statistics/442354/music-genres-preferred-consumers-usa/ 
+[5] https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/ 
+[6] https://developer.spotify.com/documentation/web-api/ 
+[7] https://www.rdocumentation.org/packages/spotifyr/versions/1.0.0 
+[8] https://stackoverflow.com/questions/17727208/spotify-how-is-a-tracks-popularity-value-determined
