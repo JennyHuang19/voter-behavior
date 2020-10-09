@@ -88,12 +88,12 @@ glimpse(spotify)
 ```
 
 ## References
-[1] https://www.kaylinpavlik.com/classifying-songs-genres/
-[2] https://www.displayr.com/most-popular-music/
-[3] https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-01-21
-[4] https://www.statista.com/statistics/442354/music-genres-preferred-consumers-usa/ 
-[5] https://stackoverflow.com/questions/17727208/spotify-how-is-a-tracks-popularity-value-determined
-[6] https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/ 
-[7] https://developer.spotify.com/documentation/web-api/ 
-[8] https://www.rdocumentation.org/packages/spotifyr/versions/1.0.0 
+- [1] https://www.kaylinpavlik.com/classifying-songs-genres/
+- [2] https://www.displayr.com/most-popular-music/
+- [3] https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-01-21
+- [4] https://www.statista.com/statistics/442354/music-genres-preferred-consumers-usa/ 
+- [5] https://stackoverflow.com/questions/17727208/spotify-how-is-a-tracks-popularity-value-determined
+- [6] https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/ 
+- [7] https://developer.spotify.com/documentation/web-api/ 
+- [8] https://www.rdocumentation.org/packages/spotifyr/versions/1.0.0 
 
