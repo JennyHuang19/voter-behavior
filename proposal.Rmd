@@ -19,6 +19,7 @@ library(patchwork)
 
 ```{r data}
 spotify <- read_csv("data/spotify_songs.csv")
+ski <- read_csv("data/skiResort.csv")
 ```
 
 ### Section 1. Introduction
