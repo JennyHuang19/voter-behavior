@@ -37,7 +37,7 @@ elections_clean <- elections %>%
                              CITIZEN == 1 | CITIZEN == 2 | CITIZEN == 3 ~ 
                                "Native Born",
                              CITIZEN == 4 ~ "Naturalized")) %>% 
-  mutate(ethnicity = if_else(HISPAN == 0 | HISPAN == 901 | HISPAN == 902, 
+  mutate(hispanic_status = if_else(HISPAN == 0 | HISPAN == 901 | HISPAN == 902, 
                              "Not Hispanic/Unknown", "Hispanic/Latinx")) %>% 
   mutate(employed = if_else(LABFORCE == 2, "Yes", "No/Unknown")) %>% 
   mutate(highest_education = case_when(EDUC99 == 0 | EDUC99 == 1 ~ 
@@ -109,7 +109,7 @@ elections_clean <- elections %>%
                                       "Govt Office/Public Agency",
                                     VOREGHOW == 4 ~ "School/College/Hospital",
                                     VOREGHOW == 3 ~ "By Mail")) %>% 
-  select(metro, sex, marst, veteran, citizen, ethnicity, employed, 
+  select(metro, sex, marst, veteran, citizen, hispanic_status, employed, 
          highest_education, current_student, race, why_not_vote, why_not_reg,
          voting_method, voting_time, voted, registered, how_registered, YEAR,
          STATEFIP, AGE)
@@ -120,7 +120,7 @@ elections_clean <- elections_clean %>%
          marst = factor(marst),
          veteran = factor(veteran),
          citizen = factor(citizen),
-         ethnicity = factor(ethnicity),
+         hispanic_status = factor( hispanic_status),
          employed = factor(employed),
          highest_education = factor(highest_education),
          current_student = factor(current_student),
