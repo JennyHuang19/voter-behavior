@@ -33,8 +33,10 @@ elections_clean <- elections %>%
                            MARST == 3 ~ "Divorced/Separated",
                            TRUE ~ "Not Married/Other")) %>% 
   mutate(veteran = if_else(VETSTAT == 2, "Yes", "No/Uknnown")) %>% 
-  mutate(citizen = if_else(CITIZEN == 5 | CITIZEN == 9, "No/Unknown", 
-                           "Yes")) %>% 
+  mutate(citizen = case_when(CITIZEN == 5 | CITIZEN == 9 ~ "No/Unknown", 
+                             CITIZEN == 1 | CITIZEN == 2 | CITIZEN == 3 ~ 
+                               "Native Born",
+                             CITIZEN == 4 ~ "Naturalized")) %>% 
   mutate(ethnicity = if_else(HISPAN == 0 | HISPAN == 901 | HISPAN == 902, 
                              "Not Hispanic/Unknown", "Hispanic/Latinx")) %>% 
   mutate(employed = if_else(LABFORCE == 2, "Yes", "No/Unknown")) %>% 
