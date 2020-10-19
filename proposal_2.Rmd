@@ -37,6 +37,7 @@ elections_clean <- elections %>%
                              CITIZEN == 1 | CITIZEN == 2 | CITIZEN == 3 ~ 
                                "Native Born",
                              CITIZEN == 4 ~ "Naturalized")) %>% 
+  #We should probably exclude people who are not citizens from our analysis because they are not able to vote
   mutate(hispanic_status = if_else(HISPAN == 0 | HISPAN == 901 | HISPAN == 902, 
                              "Not Hispanic/Unknown", "Hispanic/Latinx")) %>% 
   mutate(employed = if_else(LABFORCE == 2, "Yes", "No/Unknown")) %>% 
