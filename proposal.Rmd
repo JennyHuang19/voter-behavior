@@ -65,7 +65,7 @@ elections_clean <- elections %>%
                                EDUC99 == 17 ~ "Professional Degree",
                                EDUC99 == 18 ~ "Doctorate Degree")) %>% 
   mutate(current_student = case_when(SCHLCOLL == 5 | SCHLCOLL == 0 ~ 
-                                       "No/Unknown",
+                                       "Not currently enrolled",
                                      SCHLCOLL == 1  ~ "High School Full Time",
                                      SCHLCOLL == 2 ~ "High School Part Time",
                                      SCHLCOLL == 3 ~ "College Full Time",

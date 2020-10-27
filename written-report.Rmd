@@ -1,7 +1,7 @@
 ---
 title: "Your project title"
-author: "Team Name: Team member 1, Team member 2, Team member 3, Team member 4"
-date: "Update date"
+author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
+date: "28 October 2020"
 output: pdf_document
 ---
 
@@ -11,5 +11,241 @@ knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE)
 ```
 
-Your written report goes here! Before you submit, make sure your code chunks are turned off with `echo = FALSE` and there are no warnings or messages with `warning = FALSE` and `message = FALSE` 
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(broom)
+library(patchwork)
+library(RColorBrewer)
+```
 
+Your written report goes here! Before you submit, make sure your code chunks are turned off with `echo = FALSE` and there are no warnings or messages with `warning = FALSE` and `message = FALSE` 
+```{r data}
+elections <- read_csv("data/data_full.csv")
+```
+
+```{r data cleaning}
+elections_clean <- elections %>% 
+  mutate(metro = if_else(METRO == 2, "Metro", "Not Metro/Unknown")) %>% 
+  mutate(sex = case_when(SEX == 1 ~ "Male",
+                         SEX == 2 ~ "Female")) %>% 
+  mutate(marst = case_when(MARST == 1 ~ "Married",
+                           MARST == 2 ~ "Married",
+                           MARST == 4 ~ "Divorced/Separated",
+                           MARST == 3 ~ "Divorced/Separated",
+                           TRUE ~ "Not Married/Other")) %>% 
+  mutate(veteran = if_else(VETSTAT == 2, "Yes", "No/Uknnown")) %>% 
+  mutate(citizen = case_when(CITIZEN == 5 | CITIZEN == 9 ~ "No/Unknown", 
+                             CITIZEN == 1 | CITIZEN == 2 | CITIZEN == 3 ~ 
+                               "Native Born",
+                             CITIZEN == 4 ~ "Naturalized")) %>% 
+  #We should probably exclude people who are not citizens from our analysis 
+  #because they are not able to vote
+  mutate(hispanic_status = if_else(HISPAN == 0 | HISPAN == 901 | HISPAN == 902, 
+                             "Not Hispanic/Unknown", "Hispanic/Latinx")) %>% 
+  mutate(employed = if_else(LABFORCE == 2, "Yes", "No/Unknown")) %>% 
+  mutate(highest_education = case_when(EDUC99 == 0 | EDUC99 == 1 ~ 
+                                         "None/Unknown",
+                               EDUC99 == 4 | EDUC99 == 5 | EDUC99 == 6 |
+                                 EDUC99 == 7 | EDUC99 == 8 | EDUC99 == 9
+                               ~ "Some High School",
+                               EDUC99 == 10 ~ "High School Degree/GED",
+                               EDUC99 == 11 ~ "Some College",
+                               EDUC99 == 12 | EDUC99 == 13 | EDUC99 == 14
+                               ~ "Associate Degree",
+                               EDUC99 == 15 ~ "Bachelors Degree",
+                               EDUC99 == 16 ~ "Masters Degree",
+                               EDUC99 == 17 ~ "Professional Degree",
+                               EDUC99 == 18 ~ "Doctorate Degree")) %>% 
+  mutate(current_student = case_when(SCHLCOLL == 5 | SCHLCOLL == 0 ~ 
+                                       "Not currently enrolled",
+                                     SCHLCOLL == 1  ~ "High School Full Time",
+                                     SCHLCOLL == 2 ~ "High School Part Time",
+                                     SCHLCOLL == 3 ~ "College Full Time",
+                                     SCHLCOLL == 4 ~ "College Part Time")) %>% 
+#of people 16-24
+  mutate(race = case_when(RACE == 820 | RACE == 830 | RACE == 830 | RACE == 819 
+                          | RACE == 804 | RACE == 805 | RACE == 806 | 
+                            RACE == 807 | RACE == 808 | RACE == 810 | 
+                            RACE == 811 | RACE == 812 | RACE == 813 | 
+                            RACE == 814 | RACE == 815 | RACE == 816 | 
+                            RACE == 817 | RACE == 818 | RACE == 803 | 
+                            RACE == 801 | RACE == 802 | RACE == 830 ~ 
+                            "2 or more races",
+                          RACE == 100 ~ "White",
+                          RACE == 200 ~ "Black",
+                          RACE == 651 | RACE == 809 | RACE == 652 | RACE == 650
+                          ~ "Asian or Pacific Islander",
+                          RACE ==  300 ~ "Native American",
+                          RACE == 999 | RACE == 700 ~ "Other/Unknown")) %>% 
+  #Need to go over these race categorizations as a group!
+  mutate(why_not_vote = case_when(VOWHYNOT == 10 ~ "Inconvenience",
+                                  VOWHYNOT == 4 ~ "Interest",
+                                  VOWHYNOT == 7 ~ "Political",
+                                  VOWHYNOT == 9 | VOWHYNOT ==  6 | 
+                                    VOWHYNOT == 5 | VOWHYNOT == 2 ~ 
+                                    "Logistical",
+                                  VOWHYNOT == 1 ~ "Physically Unable",
+                                  VOWHYNOT == 8 ~ "Registration Issues",
+                                  VOWHYNOT == 3 ~ "Forgot")) %>% 
+#Reason why eligible voter did not vote
+  mutate(why_not_reg = case_when(VOYNOTREG == 8 | VOYNOTREG == 3 ~ 
+                                   "Not Eligible",
+                                 VOYNOTREG == 7 | VOYNOTREG == 6 ~ 
+                                   "Not Interested/Vote Won't Matter",
+                                 VOYNOTREG == 5 ~ "Language Barrier",
+                                 VOYNOTREG == 4 ~ "Physically Unable",
+                                 VOYNOTREG == 2 | VOYNOTREG == 1 ~ 
+                                   "Lacked Info/Missed Deadline")) %>% 
+  mutate(voting_method = case_when(VOTEHOW == 1 ~ "In Person",
+                                   VOTEHOW == 2 ~ "Mail-In")) %>% 
+  mutate(voting_time = case_when(VOTEWHEN == 2 ~ "Early",
+                                 VOTEWHEN == 1 ~"Voting Day")) %>% 
+  mutate(voted = case_when(VOTED == 1 ~ 0,
+                           VOTED == 2 ~ 1)) %>% 
+  mutate(registered = case_when(VOREG == 1 ~ 0,
+                           VOREG == 2 ~ 1)) %>% 
+  mutate(how_registered = case_when(VOREGHOW == 8 ~ "Online",
+                                    VOREGHOW == 7 ~ "Polling Place",
+                                    VOREGHOW == 6 ~ "Registration Drive",
+                                    VOREGHOW == 5 | VOREGHOW == 2 | 
+                                      VOREGHOW == 1 ~ 
+                                      "Govt Office/Public Agency",
+                                    VOREGHOW == 4 ~ "School/College/Hospital",
+                                    VOREGHOW == 3 ~ "By Mail")) %>% 
+  select(metro, sex, marst, veteran, citizen, hispanic_status, employed, 
+         highest_education, current_student, race, why_not_vote, why_not_reg,
+         voting_method, voting_time, voted, registered, how_registered, YEAR,
+         STATEFIP, AGE)
+
+elections_clean <- elections_clean %>% 
+  mutate(metro = factor(metro),
+         sex = factor (sex),
+         marst = factor(marst),
+         veteran = factor(veteran),
+         citizen = factor(citizen),
+         hispanic_status = factor( hispanic_status),
+         employed = factor(employed),
+         highest_education = factor(highest_education),
+         current_student = factor(current_student),
+         race = factor(race),
+         why_not_vote = factor(why_not_vote),
+         why_not_reg = factor(why_not_reg),
+         voting_method = factor(voting_method),
+         voting_time = factor(voting_time),
+         voted = factor(voted),
+         registered = factor(registered),
+         how_registered = factor(how_registered))
+
+```
+
+### Introduction
+
+EDA for the response variable and a few other interesting variables and relationships
+
+```{r EDA}
+response_plot <- ggplot(data = elections_clean, aes(x = voted)) +
+  geom_bar() +
+  labs(title = "Visualizing the Distribution of Voting Status", y = "Count",
+       x = "Voted", subtitle = "More people reportedly voted than did not vote",
+       caption = "0 = Did not Vote, 1 = Voted")
+response_plot
+```
+```{r fig.height=6, fig.width=12}
+EDA1 <- elections_clean %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar() +
+  scale_fill_brewer(palette="Paired") +
+  labs(title = "Voting distribution of population of 16-24 years old", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+
+EDA2 <- elections_clean %>% 
+  filter(current_student != "Not currently enrolled") %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar() +
+  scale_fill_brewer(palette="Paired") +
+  labs(title = "Voting distribution of population of 16-24 years old 
+       who are enrolled in school", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+EDA1 + EDA2
+
+elections_clean %>% 
+  filter(AGE == 24) %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar() +
+  labs(title = "Voting distribution of population of 24 year olds 
+      student status", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+
+elections_clean %>% 
+  filter(AGE <= 22) %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar(position = "fill") +
+  labs(title = "Voting distribution of population of 16-22 years old 
+       who are enrolled in school", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+
+elections_clean %>% 
+  filter(AGE <= 22) %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar(position = "fill") +
+  labs(title = "Voting distribution of population of 16-22 years old 
+       who are enrolled in school", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+```
+
+```{r EDA3}
+elections_clean %>% 
+  ggplot(aes(x = voted, fill = citizen)) +
+  geom_bar() +
+  scale_fill_brewer(palette="Paired") +
+  labs(title = "Voting distribution based on citizenship status", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Citizenship Status")
+
+```
+
+```{r EDA4}
+elections_clean %>% 
+  ggplot(aes(x = AGE, y = voted)) +
+  geom_boxplot() +
+  coord_flip()+
+  labs(title = "Relationship between age and voting", 
+       y = "Voting Status", x = "Age", 
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Citizenship Status")
+
+```
+
+```{r EDA5}
+elections_clean %>% 
+  ggplot(aes(x = voted, fill = veteran)) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer(palette="Paired") +
+  labs(title = "Voting distribution based on veteran status", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between veteran status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Veteran Status")
+
+```
+
+
+
+keep in mind: citizenship and registration exclusion for the model
