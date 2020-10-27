@@ -16,6 +16,8 @@ library(tidyverse)
 library(broom)
 library(patchwork)
 library(RColorBrewer)
+library(ggthemes)
+library(viridis)
 ```
 
 Your written report goes here! Before you submit, make sure your code chunks are turned off with `echo = FALSE` and there are no warnings or messages with `warning = FALSE` and `message = FALSE` 
@@ -143,19 +145,30 @@ elections_clean <- elections_clean %>%
 EDA for the response variable and a few other interesting variables and relationships
 
 ```{r EDA}
-response_plot <- ggplot(data = elections_clean, aes(x = voted)) +
+response_plot <- ggplot(data = elections_clean, aes(x = voted, fill = "gainsboro")) +
   geom_bar() +
+  theme_bw() +
+  theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"),
+        panel.grid.major = element_line(color = "Navy Blue", size=.1),
+        legend.position = "none") +
+  scale_fill_manual(values = c("gainsboro")) +
   labs(title = "Visualizing the Distribution of Voting Status", y = "Count",
        x = "Voted", subtitle = "More people reportedly voted than did not vote",
        caption = "0 = Did not Vote, 1 = Voted")
 response_plot
 ```
-```{r fig.height=6, fig.width=12}
+
+```{r fig.height=6, fig.width=14}
 EDA1 <- elections_clean %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
-  scale_fill_brewer(palette="Paired") +
-  labs(title = "Voting distribution of population of 16-24 years old", 
+  theme_bw() +
+  theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"),
+        panel.grid.major = element_line(color = "Navy Blue", size=.1))+
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Voting Distribution of Population of 16-24 Years Olds", 
        y = "Count", x = "Voted", 
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
@@ -165,19 +178,25 @@ EDA2 <- elections_clean %>%
   filter(current_student != "Not currently enrolled") %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
-  scale_fill_brewer(palette="Paired") +
-  labs(title = "Voting distribution of population of 16-24 years old 
-       who are enrolled in school", 
+  theme_bw() +
+    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"),
+        panel.grid.major = element_line(color = "Navy Blue", size=.1))+
+  scale_fill_brewer(palette="Blues") +
+  labs(title = "Voting Distribution of Population of 16-24 Year Olds 
+Enrolled in School", 
        y = "Count", x = "Voted", 
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Current Student Status")
 EDA1 + EDA2
 
-elections_clean %>% 
+EDA3 <- elections_clean %>% 
   filter(AGE == 24) %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
+    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"))+
   labs(title = "Voting distribution of population of 24 year olds 
       student status", 
        y = "Count", x = "Voted", 
@@ -185,10 +204,26 @@ elections_clean %>%
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Current Student Status")
 
+EDA4 <- elections_clean %>% 
+  filter(AGE <= 22) %>% 
+  ggplot(aes(x = voted, fill = current_student)) +
+  geom_bar(position = "fill") +
+    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"))+
+  labs(title = "Voting Distribution of Population of 16-22 Year Olds 
+Enrolled in School", 
+       y = "Count", x = "Voted", 
+       subtitle = "Examining relationship between student status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Current Student Status")
+EDA3 + EDA4
+
 elections_clean %>% 
   filter(AGE <= 22) %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar(position = "fill") +
+    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
+        plot.subtitle = element_text(face = 4, color = "grey54"))+
   labs(title = "Voting distribution of population of 16-22 years old 
        who are enrolled in school", 
        y = "Count", x = "Voted", 
@@ -196,16 +231,7 @@ elections_clean %>%
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Current Student Status")
 
-elections_clean %>% 
-  filter(AGE <= 22) %>% 
-  ggplot(aes(x = voted, fill = current_student)) +
-  geom_bar(position = "fill") +
-  labs(title = "Voting distribution of population of 16-22 years old 
-       who are enrolled in school", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between student status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Current Student Status")
+
 ```
 
 ```{r EDA3}
