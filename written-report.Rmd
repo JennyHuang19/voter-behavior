@@ -20,7 +20,6 @@ library(ggthemes)
 library(viridis)
 ```
 
-Your written report goes here! Before you submit, make sure your code chunks are turned off with `echo = FALSE` and there are no warnings or messages with `warning = FALSE` and `message = FALSE` 
 ```{r data}
 elections <- read_csv("data/data_full.csv")
 ```
@@ -262,7 +261,7 @@ elections_clean %>%
 We are also interested in looking at how voter turnout has changed over the
 years.
 
-```{r}
+```{r year-voting-frequency}
 elections_year <- elections_clean %>% 
   group_by(YEAR) %>% 
   count(voted) %>% 
@@ -276,7 +275,7 @@ there is a presidential elections versus when there is not. In the future, we
 may decide to add the variable "Election Year" as an interaction term with year
 as a divide between years that fall on an election.
 
-```{r}
+```{r EDA6}
 elections_year %>% 
   filter(voted == 1) %>% 
   ggplot(aes(x = YEAR, y = prop_voted)) +
@@ -285,25 +284,29 @@ elections_year %>%
        y = "Proportion of People Who Voted", x = "Year")
 ```
 
-```{r}
+```{r new-variable}
 elections_clean <- elections_clean %>% 
   mutate(Presidential_Election_Year = if_else(YEAR %in% c(2004, 2008, 
-                                                          2012, 2016), 1, 0))
+                                                          2012, 2016), 1, 0),
+         Presidential_Election_Year = factor(Presidential_Election_Year))
 ```
 
 ### Model Selection 
-```{r}
 
-elections_model = elections_clean%>%
+```{r model-selection}
+
+elections_model <- elections_clean%>%
   filter(YEAR==2016) 
 
-full_model = glm(voted ~ metro + sex + marst + veteran+ citizen + hispanic_status + employed + highest_education + current_student + race + AGE,
+full_model <- glm(voted ~ metro + sex + marst + veteran+ citizen + 
+                   hispanic_status + employed + highest_education + 
+                   current_student + race + AGE,
                      data = elections_model,
                       family = "binomial")
 Backward_Model <- step(full_model, direction = "backward")
 tidy(Backward_Model)
 
-int_only_model = glm(voted ~1,
+int_only_model <- glm(voted ~1,
                      data = elections_model,
                       family = "binomial")
 Backward_Model2 <- step(full_model, scope=formula(int_only_model), direction = "backward")
@@ -311,7 +314,9 @@ tidy(Backward_Model2)
 
 
 ```
-```{r}
+
+
+```{r model-selection-test}
 elections_model = elections_clean%>%
   filter(YEAR==2016)
 full_model = glm(voted ~ metro + marst + race + AGE,
@@ -326,7 +331,7 @@ int_only_model = glm(voted ~1,
 Backward_Model2 <- step(full_model, scope=formula(int_only_model), direction = "backward")
 tidy(Backward_Model2)
 ```
-
+### Checking Model Conditions 
 
 
 [1]: http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
