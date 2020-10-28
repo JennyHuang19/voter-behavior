@@ -259,6 +259,38 @@ elections_clean %>%
        fill = "Veteran Status")
 
 ```
+We are also interested in looking at how voter turnout has changed over the
+years.
+
+```{r}
+elections_clean <- elections_clean %>% 
+  group_by(YEAR) %>% 
+  count(voted) %>% 
+  mutate(prop_voted = n/sum(n))
+```
+
+We notice that the proportion of people who voted fluctuates depending on
+whether the year falls on a presidential election. In the trend of the 
+proportion of voting over time, we see a clear divide between the years when
+there is a presidential elections versus when there is not. In the future, we 
+may decide to add the variable "Election Year" as an interaction term with year
+as a divide between years that fall on an election.
+
+```{r}
+elections_clean %>% 
+  filter(voted == 1) %>% 
+  ggplot(aes(x = YEAR, y = prop_voted)) +
+  geom_point() +
+  labs(title = "More Voters During Presidential Election Years", 
+       y = "Proportion of People Who Voted", x = "Year")
+```
+
+```{r}
+elections_clean <- elections_clean %>% 
+  mutate(Presidential_Election_Year = if_else(YEAR %in% c(2004, 2008, 
+                                                          2012, 2016), 1, 0))
+```
+
 
 
 [1]: http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
