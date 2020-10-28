@@ -139,6 +139,30 @@ elections_clean <- elections_clean %>%
 
 ```
 
+```{r relevel-factors}
+##factor relevel to make raceWhite or raceBlack the baseline.
+
+elections_clean <- elections_clean %>% 
+  mutate(metro = factor(metro),
+         sex = factor (sex),
+         marst = factor(marst),
+         veteran = factor(veteran),
+         citizen = factor(citizen),
+         hispanic_status = factor( hispanic_status),
+         employed = factor(employed),
+         highest_education = factor(highest_education),
+         current_student = factor(current_student),
+         race = factor(race),
+         why_not_vote = factor(why_not_vote),
+         why_not_reg = factor(why_not_reg),
+         voting_method = factor(voting_method),
+         voting_time = factor(voting_time),
+         voted = factor(voted),
+         registered = factor(registered),
+         how_registered = factor(how_registered))
+
+```
+
 ### Introduction
 
 We will begin our EDA by visualizing the relationship between the response variable
@@ -304,7 +328,7 @@ elections_red <- elections_clean %>%
 
 ```{r}
 int_only_model = glm(voted ~ 1,
-                     data = elections_model,
+                     data = elections_red,
                       family = "binomial")
 
 full_model = glm(voted ~ metro + sex + marst + veteran+ citizen + 
@@ -386,10 +410,19 @@ aug_fips <- left_join(model_aug, tojoin, by ="AGE")
 
 Below are the misclassification rates by region.
 ```{r}
+aug_fips <- aug_fips %>% 
+  mutate(region = case_when(region == 1 ~ "Northeast",
+                            region == 2 ~ "Midwest",
+                            region == 3 ~ "South",
+                            region == 4 ~ "West"))
+# used Census data for the region fips number corresponding to region name [3]
+
 aug_fips %>% 
   group_by(region) %>% 
   count(voted, predicted_voted) %>%  #all combs of responses specified as arguments
-  mutate(prop = n / sum(n))
+  mutate(prop = n / sum(n)) %>% 
+  filter(voted == 1 & predicted_voted == "Will Not Vote" | 
+        voted == 0 & predicted_voted == "Will Vote") 
 ```
 We plan to create a plot of misclassification rate by region to determine if 
 independence is satisfied.
@@ -441,13 +474,11 @@ We observe that raceWhite has a VIF value
 that is above 10 (10.072951). This means that colinearity might be present
 between raceWhite and raceBlack (7.074850).
 
-```{r}
-##factor relevel to make raceWhite or raceBlack the baseline.
-
-```
 
 
-[1]: http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
-[2]: https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
+
+[1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
+[2] https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
+[3] https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
 
 keep in mind: citizenship and registration exclusion for the model
