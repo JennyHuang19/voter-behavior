@@ -263,7 +263,7 @@ We are also interested in looking at how voter turnout has changed over the
 years.
 
 ```{r}
-elections_clean <- elections_clean %>% 
+elections_year <- elections_clean %>% 
   group_by(YEAR) %>% 
   count(voted) %>% 
   mutate(prop_voted = n/sum(n))
@@ -277,7 +277,7 @@ may decide to add the variable "Election Year" as an interaction term with year
 as a divide between years that fall on an election.
 
 ```{r}
-elections_clean %>% 
+elections_year %>% 
   filter(voted == 1) %>% 
   ggplot(aes(x = YEAR, y = prop_voted)) +
   geom_point() +
@@ -289,6 +289,42 @@ elections_clean %>%
 elections_clean <- elections_clean %>% 
   mutate(Presidential_Election_Year = if_else(YEAR %in% c(2004, 2008, 
                                                           2012, 2016), 1, 0))
+```
+
+### Model Selection 
+```{r}
+
+elections_model = elections_clean%>%
+  filter(YEAR==2016) 
+
+full_model = glm(voted ~ metro + sex + marst + veteran+ citizen + hispanic_status + employed + highest_education + current_student + race + AGE,
+                     data = elections_model,
+                      family = "binomial")
+Backward_Model <- step(full_model, direction = "backward")
+tidy(Backward_Model)
+
+int_only_model = glm(voted ~1,
+                     data = elections_model,
+                      family = "binomial")
+Backward_Model2 <- step(full_model, scope=formula(int_only_model), direction = "backward")
+tidy(Backward_Model2)
+
+
+```
+```{r}
+elections_model = elections_clean%>%
+  filter(YEAR==2016)
+full_model = glm(voted ~ metro + marst + race + AGE,
+                     data = elections_model,
+                      family = "binomial")
+Backward_Model <- step(full_model, direction = "backward")
+tidy(Backward_Model)
+
+int_only_model = glm(voted ~1,
+                     data = elections_model,
+                      family = "binomial")
+Backward_Model2 <- step(full_model, scope=formula(int_only_model), direction = "backward")
+tidy(Backward_Model2)
 ```
 
 
