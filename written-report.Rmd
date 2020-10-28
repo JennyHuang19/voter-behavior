@@ -142,16 +142,22 @@ elections_clean <- elections_clean %>%
 
 ### Introduction
 
-EDA for the response variable and a few other interesting variables and relationships
+We will begin our EDA by visualizing the relationship between the response variable
+`voted` and several of the other variables of particular interest.
+
+We will begin by simply looking at the distribution of those who voted throughout 
+the last 8 years of elections.
 
 ```{r EDA}
 response_plot <- ggplot(data = elections_clean, aes(x = voted, fill = "gainsboro")) +
   geom_bar() +
   theme_bw() +
+  # see theme code inspiration at reference 1 
   theme(plot.title= element_text(face="bold", color = "Navy Blue"),
         plot.subtitle = element_text(face = 4, color = "grey54"),
         panel.grid.major = element_line(color = "Navy Blue", size=.1),
         legend.position = "none") +
+  # see scale fill code inspiration at reference 2
   scale_fill_manual(values = c("gainsboro")) +
   labs(title = "Visualizing the Distribution of Voting Status", y = "Count",
        x = "Voted", subtitle = "More people reportedly voted than did not vote",
@@ -159,7 +165,11 @@ response_plot <- ggplot(data = elections_clean, aes(x = voted, fill = "gainsboro
 response_plot
 ```
 
-```{r fig.height=6, fig.width=14}
+From the barplot above, it is clear the more individuals in the data set voted (voted = 1) than did not (voted = 0).
+
+As college students ourselves, we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
+
+```{r}
 EDA1 <- elections_clean %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
@@ -167,13 +177,33 @@ EDA1 <- elections_clean %>%
   theme(plot.title= element_text(face="bold", color = "Navy Blue"),
         plot.subtitle = element_text(face = 4, color = "grey54"),
         panel.grid.major = element_line(color = "Navy Blue", size=.1))+
+  #see scale fill brewer code inspiration from reference 1
   scale_fill_brewer(palette = "Blues") +
-  labs(title = "Voting Distribution of Population of 16-24 Years Olds", 
+  labs(title = "Voting Distribution of Population of 16-24 Year Olds", 
        y = "Count", x = "Voted", 
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Current Student Status")
+EDA1
+```
 
+From the bar plot, it is evident that a majority of these individuals were not currently enrolled. This may be a result of a general national trend, but we want to investigate if it is the result of a larger proportion of older individuals within in the range of ages between 16-24. We will investigate this by analyzing those who are not currently enrolled in school within this age range.
+
+```{r}
+elections_clean %>%
+  filter(current_student == "Not currently enrolled") %>%
+  filter(AGE >=16 & AGE <=24) %>%
+  group_by(AGE) %>%
+  count()  %>% 
+  ungroup() %>%
+  mutate(prop = n/sum(n)) %>%
+  kable(digits = 3)
+```
+From the kable above, it is apparent that more than 40% of those not currently enrolled in school are 23-24 years old. This could be a potential reason for why this age range includes so many who are not currently enrolled as a student. 
+
+To more meaningfully analyze the relationship between being a student and if they vote or not, we adjusted our visualization to only include those currently enrolled in some level of education. This is seen in the visualization below. 
+
+```{r}
 EDA2 <- elections_clean %>% 
   filter(current_student != "Not currently enrolled") %>% 
   ggplot(aes(x = voted, fill = current_student)) +
@@ -189,49 +219,7 @@ Enrolled in School",
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Current Student Status")
-EDA1 + EDA2
-
-EDA3 <- elections_clean %>% 
-  filter(AGE == 24) %>% 
-  ggplot(aes(x = voted, fill = current_student)) +
-  geom_bar() +
-    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
-        plot.subtitle = element_text(face = 4, color = "grey54"))+
-  labs(title = "Voting distribution of population of 24 year olds 
-      student status", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between student status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Current Student Status")
-
-EDA4 <- elections_clean %>% 
-  filter(AGE <= 22) %>% 
-  ggplot(aes(x = voted, fill = current_student)) +
-  geom_bar(position = "fill") +
-    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
-        plot.subtitle = element_text(face = 4, color = "grey54"))+
-  labs(title = "Voting Distribution of Population of 16-22 Year Olds 
-Enrolled in School", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between student status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Current Student Status")
-EDA3 + EDA4
-
-elections_clean %>% 
-  filter(AGE <= 22) %>% 
-  ggplot(aes(x = voted, fill = current_student)) +
-  geom_bar(position = "fill") +
-    theme(plot.title= element_text(face="bold", color = "Navy Blue"),
-        plot.subtitle = element_text(face = 4, color = "grey54"))+
-  labs(title = "Voting distribution of population of 16-22 years old 
-       who are enrolled in school", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between student status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Current Student Status")
-
-
+EDA2
 ```
 
 ```{r EDA3}
@@ -273,5 +261,7 @@ elections_clean %>%
 ```
 
 
+[1]: http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
+[2]: https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
 
 keep in mind: citizenship and registration exclusion for the model

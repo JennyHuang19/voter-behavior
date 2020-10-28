@@ -1,5 +1,5 @@
 ---
-title: "Project proposal"
+title: "Project Proposal"
 author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
 date: "20 October 2020"
 output: pdf_document
