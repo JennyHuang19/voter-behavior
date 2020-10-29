@@ -254,6 +254,7 @@ Enrolled in School",
        fill = "Current Student Status")
 EDA2
 ```
+This visualization shows that eligible voters between the age 16-24 enrolled in some education at the time were mainly full time college students. More full time and part time college students that were eligible to vote did vote compared to those that did not vote. The opposite is true for high school students: more full time and part time high school students that were eligible to vote did not vote compared to those that did vote. 
 
 ```{r EDA3}
 elections_clean %>% 
@@ -267,7 +268,7 @@ elections_clean %>%
        fill = "Citizenship Status")
 
 ```
-
+This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized.
 ```{r EDA4}
 elections_clean %>% 
   ggplot(aes(x = AGE, y = voted)) +
@@ -279,7 +280,7 @@ elections_clean %>%
        fill = "Citizenship Status")
 
 ```
-
+This box plot shows that eligible voters that did vote were generally older than eligible voters that did not vote.
 ```{r EDA5}
 elections_clean %>% 
   ggplot(aes(x = voted, fill = veteran)) +
@@ -398,6 +399,16 @@ marst + Presidential_Election_Status + AGE + highest_education.
 
 The backward selection based on AIC took out the variables metro, veteran, and hispanic_status.
 
+Interpretation of coefficients of interest:
+
+Baseline: Female, married, native born, not employed, Bachelors Degree is highest education, not currently enrolled in school if between the age of 16-24, white, and the time of voting is midterm following the election of an incumbent president.
+
+
+We expect the odds of an eligible voter voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+
+For each additional year in age, we expect the odds of an eligible voter voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+
+We expect the odds of an eligible voter voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
 ### Checking Model Conditions 
 
@@ -581,6 +592,11 @@ anova(reduced_model, full_model, test = "Chisq") %>%
 ```
 
 The p-value (7.840e-07) is very small (less than the alpha level 0.05), so we can reject the null hypothesis. Thus, we conclude that the data provide sufficient evidence that the coefficients associated with the additional interaction terms are not equal to 0. Therefore, we should add them to the model.
+
+Significant interaction terms:
+The effect of the election being a presidential election for an individual with the highest level of education as a High School Degree/GED is significant with a p-value of 0.011 assuming an alpha level of 0.05. The coefficient is negative, indicating that this effect would mean that during a presidential election for an individual with the highest level of education as a High School Degree/GED, they are less likely to vote than individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president.
+
+The effect of the election being a presidential election for an individual that is black is significant with a p-value of 0.013 assuming an alpha level of 0.05. The coefficient is positive, indicating that this effect would mean that during a presidential election for an individual that is black, they are more likely to vote than individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president
 
 [1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
 [2] https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
