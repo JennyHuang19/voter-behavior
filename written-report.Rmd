@@ -113,10 +113,25 @@ elections_clean <- elections %>%
                                       "Govt Office/Public Agency",
                                     VOREGHOW == 4 ~ "School/College/Hospital",
                                     VOREGHOW == 3 ~ "By Mail")) %>% 
+  mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
+                                                          2012, 2016) ~ 
+                                                    "Presidential",
+                                                  YEAR %in% c(2006, 2014) ~ 
+                                       "Midterm Following Incumbent President",
+                                          YEAR %in% c(2010, 2018) ~ 
+                                          "Midterm Following New President"),
+         Presidential_Election_Status = factor(Presidential_Election_Status)) %>% 
+    mutate(Is_Presidential_Election = case_when(YEAR %in% c(2004, 2008, 
+                                                          2012, 2016) ~ 
+                                                    "Presidential",
+                                                  YEAR %in% c(2006, 2010, 2014, 
+                                                              2018) ~ 
+                                       "Non-Presidential"),
+         Is_Presidential_Election = factor(Is_Presidential_Election)) %>% 
   select(metro, sex, marst, veteran, citizen, hispanic_status, employed, 
          highest_education, current_student, race, why_not_vote, why_not_reg,
          voting_method, voting_time, voted, registered, how_registered, YEAR,
-         STATEFIP, AGE)
+         STATEFIP, AGE, Presidential_Election_Status, Is_Presidential_Election)
 
 elections_clean <- elections_clean %>% 
   mutate(metro = factor(metro),
@@ -163,7 +178,10 @@ elections_clean <- elections_clean %>%
                                          "College Part Time")),
          race = fct_relevel(race, c("White","Black","Asian or Pacific Islander", 
                                     "Native American", "2 or more races", 
-                                    "Other/Unknown")))
+                                    "Other/Unknown")),
+         Presidential_Election_Status = fct_relevel(Presidential_Election_Status, 
+                    c("Presidential", "Midterm Following Incumbent President", 
+                                      "Midterm Following New President")))
 ```
 
 ### Introduction
@@ -320,27 +338,7 @@ elections_year %>%
        y = "Proportion of People Who Voted", x = "Year")
 ```
 
-```{r new-variable}
-elections_clean <- elections_clean %>% 
-  mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
-                                                          2012, 2016) ~ 
-                                                    "Presidential",
-                                                  YEAR %in% c(2006, 2014) ~ 
-                                       "Midterm Following Incumbent President",
-                                          YEAR %in% c(2010, 2018) ~ 
-                                          "Midterm Following New President"),
-         Presidential_Election_Status = factor(Presidential_Election_Status))
 
-
-#2004 - Presidential
-#2006 - Midterm After Incumbent President
-#2008 - Presidential
-#2010 - Midterm After New President
-#2012 - Presidential
-#2014 - Midterm After Incumbent President
-#2016 - Presidential
-#2018 - Midterm After New President
-```
 
 We decided to look at the scatterplot of voter turnout over time broken down by the status of the election (Presidential election, midterm after incumbent president, or midterm after new president) to see how it may differ depending on the election.
 
@@ -574,7 +572,7 @@ reduced_model <- best_model
 
 full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
                     race + marst + Presidential_Election_Status + AGE + 
-                    highest_education + sex*employed + 
+                    highest_education +
                     Presidential_Election_Status*highest_education + 
                     AGE*Presidential_Election_Status + 
                     sex*Presidential_Election_Status + 
@@ -585,18 +583,75 @@ tidy(full_model) %>%
   kable(digits = 3)
 ```
 
+
 ```{r drop-in-deviance}
 anova(reduced_model, full_model, test = "Chisq") %>%
   tidy() %>% 
   kable(digits = 3)
 ```
 
-The p-value (7.840e-07) is very small (less than the alpha level 0.05), so we can reject the null hypothesis. Thus, we conclude that the data provide sufficient evidence that the coefficients associated with the additional interaction terms are not equal to 0. Therefore, we should add them to the model.
+The p-value (7.840e-07) is very small (less than the alpha level 0.05), 
+so we can reject the null hypothesis. Thus, we conclude that the data provide 
+sufficient evidence that the coefficients associated with the additional 
+interaction terms are not equal to 0. Therefore, we should add them to the model.
 
 Significant interaction terms:
-The effect of the election being a presidential election for an individual with the highest level of education as a High School Degree/GED is significant with a p-value of 0.011 assuming an alpha level of 0.05. The coefficient is negative, indicating that this effect would mean that during a presidential election for an individual with the highest level of education as a High School Degree/GED, they are less likely to vote than individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president.
+The effect of the election being a presidential election for an individual with
+the highest level of education as a High School Degree/GED is significant with
+a p-value of 0.011 assuming an alpha level of 0.05. The coefficient is negative,
+indicating that this effect would mean that during a presidential election for
+an individual with the highest level of education as a High School Degree/GED,
+they are less likely to vote than individuals that are female, married, native
+born, not employed, have Bachelors Degree as their highest education, 
+not currently enrolled in school if between the age of 16-24, white, and 
+the election is a midterm election following the election of an incumbent 
+president.
 
-The effect of the election being a presidential election for an individual that is black is significant with a p-value of 0.013 assuming an alpha level of 0.05. The coefficient is positive, indicating that this effect would mean that during a presidential election for an individual that is black, they are more likely to vote than individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president
+The effect of the election being a presidential election for an individual that
+is black is significant with a p-value of 0.013 assuming an alpha level of 0.05.
+The coefficient is positive, indicating that this effect would mean that during
+a presidential election for an individual that is black, they are more likely to
+vote than individuals that are female, married, native born, not employed, have
+Bachelors Degree as their highest education,  not currently enrolled in school
+if between the age of 16-24, white, and the election is a midterm election
+following the election of an incumbent president
+
+
+```{r}
+reduced_model <- best_model
+
+full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
+                    race + marst + Is_Presidential_Election + AGE + 
+                    highest_education +
+                    Presidential_Election_Status*highest_education + 
+                    AGE*Presidential_Election_Status + 
+                    sex*Presidential_Election_Status + 
+                    race*Presidential_Election_Status,
+                     data = elections_red,
+                      family = "binomial")
+```
+
+
+From the drop-in-deviance test to include variable sex, the p-value is greater
+than an alpha-level of 0.10, so we will exclude sex from the model.
+
+```{r}
+sex_included <- best_model
+
+sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed + 
+                    race + marst + Presidential_Election_Status + AGE + 
+                    highest_education,
+                     data = elections_red,
+                      family = "binomial")
+```
+
+
+```{r drop-in-deviance}
+anova(sex_excluded, sex_included, test = "Chisq") %>%
+  tidy() %>% 
+  kable(digits = 3)
+```
+
 
 [1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
 [2] https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
