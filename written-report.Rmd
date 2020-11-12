@@ -18,6 +18,7 @@ library(patchwork)
 library(RColorBrewer)
 library(ggthemes)
 library(viridis)
+library(skimr)
 ```
 
 ```{r data}
@@ -189,6 +190,7 @@ elections_clean <- elections_clean %>%
 We will begin our EDA by visualizing the relationship between the response variable describing whether or not someone voted and several of the other variables of particular interest.
 
 We will begin by simply looking at the distribution of those who voted throughout the last 8 years of elections.
+
 
 ```{r EDA, fig.height=3, fig.width=5}
 response_plot <- ggplot(data = elections_clean, aes(x = voted, 
@@ -386,6 +388,10 @@ elections_year %>%
 
 From the above scatterplot, we confirmed that there is higher voter turnout during presidential elections compared to midterm elections. In addition, there is equal or higher voter turnout for midterm elections following the election of a new president compared to midterm elections following the election of an incumbent president, and an especially high voter turnout in the midterm election after Trump's election in 2016.
 
+Finally, it is important to acknowledge that our any missingness in our data, as it may influence the outcome of our regression analysis.
+
+
+
 ### Model Selection 
 
 ##Select a random subset of the data to create model.
@@ -398,12 +404,12 @@ elections_red <- elections_clean %>%
   sample_n(10000)
 ```
 
-```{r backward-selection}
-int_only_model = glm(voted ~ 1,
+```{r backward-selection, include=FALSE}
+int_only_model <- glm(voted ~ 1,
                      data = elections_red,
                       family = "binomial")
 
-full_model = glm(voted ~ metro + sex + marst + veteran+ citizen + 
+full_model <- glm(voted ~ metro + sex + marst + veteran+ citizen + 
                    hispanic_status + employed + highest_education + 
                    current_student + race + AGE + Presidential_Election_Status
                  + YEAR,
@@ -412,12 +418,19 @@ full_model = glm(voted ~ metro + sex + marst + veteran+ citizen +
 
 best_model <- step(full_model, scope=formula(int_only_model), 
                    direction = "backward")
+
+```
+
+```{r tidy model}
 tidy(best_model) %>% 
   kable(digits = 3)
 ```
 
 The final model included YEAR + sex + current_student + citizen + employed + race + 
 marst + Presidential_Election_Status + AGE + highest_education. 
+
+The final model is: 
+
 
 The backward selection based on AIC took out the variables metro, veteran, and hispanic_status.
 
@@ -655,9 +668,8 @@ full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed +
                       family = "binomial")
 ```
 
-
-From the drop-in-deviance test to include variable sex, the p-value is greater
-than an alpha-level of 0.10, so we will exclude sex from the model.
+We will use a drop-in-deviance test to determine whether or not sex is a 
+meaningful variable in the model. 
 
 ```{r model-with-sex}
 sex_included <- best_model
@@ -675,6 +687,19 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
   tidy() %>% 
   kable(digits = 3)
 ```
+From the drop-in-deviance test to include variable sex, the p-value is greater
+than an alpha-level of 0.10, so we will exclude sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
+
+```{r}
+final_model <- sex_excluded
+
+tidy(final_model) %>%
+  kable(digits=3)
+```
+
+
+## Discussion 
+
 
 
 [1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
