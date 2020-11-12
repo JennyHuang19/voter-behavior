@@ -1,7 +1,7 @@
 ---
 title: "Written Report Draft"
 author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
-date: "28 October 2020"
+date: "17 November 2020"
 output: pdf_document
 ---
 
@@ -186,13 +186,11 @@ elections_clean <- elections_clean %>%
 
 ### Introduction
 
-We will begin our EDA by visualizing the relationship between the response variable
-`voted` and several of the other variables of particular interest.
+We will begin our EDA by visualizing the relationship between the response variable describing whether or not someone voted and several of the other variables of particular interest.
 
-We will begin by simply looking at the distribution of those who voted throughout 
-the last 8 years of elections.
+We will begin by simply looking at the distribution of those who voted throughout the last 8 years of elections.
 
-```{r EDA, fig.height=5, fig.width=5}
+```{r EDA, fig.height=3, fig.width=5}
 response_plot <- ggplot(data = elections_clean, aes(x = voted, 
                                                     fill = "gainsboro")) +
   geom_bar() +
@@ -217,7 +215,7 @@ From the barplot above, it is clear the more individuals in the data set voted (
 
 As college students ourselves, we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
 
-```{r EDA1}
+```{r EDA1, fig.height=4, fig.width=6}
 EDA1 <- elections_clean %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
@@ -254,7 +252,7 @@ From the table above, it is apparent that more than 40% of those not currently e
 
 To more meaningfully analyze the relationship between being a student and if they vote or not, we adjusted our visualization to only include those currently enrolled in some level of education. This is seen in the visualization below. 
 
-```{r EDA2}
+```{r EDA2, fig.height=4, fig.width=6}
 EDA2 <- elections_clean %>% 
   filter(current_student != "Not currently enrolled") %>% 
   ggplot(aes(x = voted, fill = current_student)) +
@@ -272,45 +270,73 @@ Enrolled in School",
        fill = "Current Student Status")
 EDA2
 ```
+
 This visualization shows that eligible voters between the age 16-24 enrolled in some education at the time were mainly full time college students. More full time and part time college students that were eligible to vote did vote compared to those that did not vote. The opposite is true for high school students: more full time and part time high school students that were eligible to vote did not vote compared to those that did vote. 
 
-```{r EDA3}
-elections_clean %>% 
-  ggplot(aes(x = voted, fill = citizen)) +
-  geom_bar() +
-  scale_fill_brewer(palette="Paired") +
+```{r EDA3, fig.height=4.3, fig.width=6}
+citizen_plot <- elections_clean %>% 
+  group_by(citizen) %>% 
+  count(voted) %>% 
+  mutate(total = sum(n)) %>% 
+  mutate(prop = n/total) %>% 
+  mutate(prop = round(prop, 3))
+citizen_plot %>% 
+  ggplot(aes(x = voted, y = prop, fill = citizen)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = prop), vjust = -0.05) + 
+  #see geom_text() code inspiration in reference [4]*
+  facet_grid(cols = vars(citizen))+
+  scale_fill_brewer(palette = "Blues") +
   labs(title = "Voting distribution based on citizenship status", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between student status and voting",
+       y = "Proportion", x = "Voted", 
+     subtitle = "Examining relationship between citizenship status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Citizenship Status")
-
+       fill = "Citizenship Status") +
+  theme_bw()
 ```
+
+*see geom_text() code inspiration in reference [4]*
+
 This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized.
-```{r EDA4}
+
+```{r EDA4, fig.height=3, fig.width=5}
 elections_clean %>% 
   ggplot(aes(x = AGE, y = voted)) +
-  geom_boxplot() +
-  coord_flip()+
+  geom_boxplot(fill = "gray") +
+  coord_flip() +
   labs(title = "Relationship between age and voting", 
        y = "Voting Status", x = "Age", 
        caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Citizenship Status")
+       fill = "Citizenship Status")+
+  theme_bw()
 
 ```
+
 This box plot shows that eligible voters that did vote were generally older than eligible voters that did not vote.
-```{r EDA5}
-elections_clean %>% 
-  ggplot(aes(x = voted, fill = veteran)) +
-  geom_bar(position = "fill") +
-  scale_fill_brewer(palette="Paired") +
-  labs(title = "Voting distribution based on veteran status", 
-       y = "Count", x = "Voted", 
-       subtitle = "Examining relationship between veteran status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Veteran Status")
 
+```{r EDA5, fig.height=4.3, fig.width=6}
+veteran_plot <- elections_clean %>% 
+  group_by(veteran) %>% 
+  count(voted) %>% 
+  mutate(total = sum(n)) %>% 
+  mutate(prop = n/total) %>% 
+  mutate(prop = round(prop, 3))
+veteran_plot %>% 
+  ggplot(aes(x = voted, y = prop, fill = veteran)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = prop), vjust = -0.05) +
+  #see geom_text() code inspiration in reference [4]*
+  facet_grid(cols = vars(veteran))+
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Voting distribution based on veteran status", 
+       y = "Proportion", x = "Voted", 
+     subtitle = "Examining relationship between veteran status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Veteran Status") +
+  theme_bw()
 ```
+
+*see geom_text() code inspiration in reference [4]*
 
 We are also interested in looking at how voter turnout has changed over the
 years.
@@ -329,7 +355,7 @@ there is a presidential elections versus when there is not. In the future, we
 may decide to add the variable "Election Year" as an interaction term with year
 as a divide between years that fall on an election.
 
-```{r EDA6, fig.height=5, fig.width=6}
+```{r EDA6, fig.height=3, fig.width=4.5}
 elections_year %>% 
   filter(voted == 1) %>% 
   ggplot(aes(x = YEAR, y = prop_voted)) +
@@ -338,11 +364,9 @@ elections_year %>%
        y = "Proportion of People Who Voted", x = "Year")
 ```
 
-
-
 We decided to look at the scatterplot of voter turnout over time broken down by the status of the election (Presidential election, midterm after incumbent president, or midterm after new president) to see how it may differ depending on the election.
 
-```{r scatterplot-over-time}
+```{r scatterplot-over-time, fig.height=4, fig.width=6.5}
 elections_year %>% 
   mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
                                                           2012, 2016) ~ 
@@ -434,7 +458,7 @@ According to the plot below, there is a linear relationship between the
 empirical logit and the predictor variable age. Hence linearity is satisfied 
 for AGE.
 
-```{r logit}
+```{r logit, fig.height=4, fig.width=6}
 library(Stat2Data)
 emplogitplot1(voted ~ AGE, data = elections_red, 
               ngroups = 10)
@@ -522,7 +546,7 @@ best_aug <- augment(best_model) %>%
 ## Cook's distance
 We will also look for influential points using Cook's Distance.
 
-```{r Cooks-D, fig.height=4, fig.width=6}
+```{r Cooks-D, fig.height=3, fig.width=6}
 ## scatterplot of Cook's D vs. observation number
 ggplot(data = best_aug, aes(x = obs_num, y = .cooksd)) +
   geom_point(alpha = 0.7) +
@@ -584,7 +608,7 @@ tidy(full_model) %>%
 ```
 
 
-```{r drop-in-deviance}
+```{r drop-in-deviance1}
 anova(reduced_model, full_model, test = "Chisq") %>%
   tidy() %>% 
   kable(digits = 3)
@@ -608,16 +632,16 @@ the election is a midterm election following the election of an incumbent
 president.
 
 The effect of the election being a presidential election for an individual that
-is black is significant with a p-value of 0.013 assuming an alpha level of 0.05.
+is Black is significant with a p-value of 0.013 assuming an alpha level of 0.05.
 The coefficient is positive, indicating that this effect would mean that during
-a presidential election for an individual that is black, they are more likely to
+a presidential election for an individual that is Black, they are more likely to
 vote than individuals that are female, married, native born, not employed, have
 Bachelors Degree as their highest education,  not currently enrolled in school
 if between the age of 16-24, white, and the election is a midterm election
 following the election of an incumbent president
 
 
-```{r}
+```{r resulting-model}
 reduced_model <- best_model
 
 full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
@@ -635,7 +659,7 @@ full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed +
 From the drop-in-deviance test to include variable sex, the p-value is greater
 than an alpha-level of 0.10, so we will exclude sex from the model.
 
-```{r}
+```{r model-with-sex}
 sex_included <- best_model
 
 sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed + 
@@ -646,7 +670,7 @@ sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed +
 ```
 
 
-```{r drop-in-deviance}
+```{r drop-in-deviance2}
 anova(sex_excluded, sex_included, test = "Chisq") %>%
   tidy() %>% 
   kable(digits = 3)
@@ -656,5 +680,6 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
 [1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
 [2] https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
 [3] https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
+[4] https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 
 
 *keep in mind: citizenship and registration exclusion for the model*
