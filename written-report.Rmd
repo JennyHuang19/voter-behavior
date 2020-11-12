@@ -691,11 +691,49 @@ From the drop-in-deviance test to include variable sex, the p-value is greater
 than an alpha-level of 0.10, so we will exclude sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
 
 ```{r}
-final_model <- sex_excluded
+voting_model <- sex_excluded
 
-tidy(final_model) %>%
+tidy(voting_model) %>%
   kable(digits=3)
 ```
+
+##Creating Classifier
+
+We'll fit an ROC curve to help us determine a decision-making threshold. 
+
+```{r}
+voting_aug <- augment(voting_model, type.predict = "response") %>%
+  mutate(voted = fct_relevel(voted, c("1", "0")))
+```
+
+```{r}
+library(broom)
+library(yardstick)
+
+# calculate sensitivity and specificity at each threshold
+roc_curve_data <- voting_aug %>%
+  roc_curve(voted, .fitted) %>%
+  mutate(pred_prob = exp(.threshold)/(1 + exp(.threshold)))
+```
+
+```{r}
+autoplot(roc_curve_data)
+```
+Below we look at values within a range of thresholds in order to choose the 
+threshold that max specificity and and sensitivity.
+
+```{r}
+roc_curve_data %>%
+  filter(.threshold > .30, .threshold < .45)
+```
+
+According to our ROC curve and modeling objectives, we will choose a threshold
+of .42 because we want to lean towards having a higher false negative rate
+(type II error) than a false positive rate as it does not hurt to mail a
+few extra ballots to people who may already be planning to vote.
+
+Any data point with a probability over 0.60 will be predicted to be in
+the "voted" category.
 
 
 ## Discussion 
