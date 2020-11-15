@@ -184,7 +184,7 @@ elections_clean <- elections_clean %>%
                                       "Midterm Following New President")))
 ```
 
-### Introduction
+# Introduction and Data
 
 We will begin our EDA by visualizing the relationship between the response variable describing whether or not someone voted and several of the other variables of particular interest.
 
@@ -389,19 +389,21 @@ From the above scatterplot, we confirmed that there is higher voter turnout duri
 
 Finally, it is important to acknowledge that our any missingness in our data, as it may influence the outcome of our regression analysis.
 
+# Methodology
 
+## Model Selection 
 
-### Model Selection 
+**Select a random subset of the data to create model.**
 
-##Select a random subset of the data to create model.
-
-In order to make our model, we have decided to take a random sample of 10,000 to be sure that the model selection is accurate.
+In order to make our model, we have decided to take a random sample of 10,000 to be sure that the model selection is accurate and not obscured by too many observations. 
 
 ```{r random-sample, message = FALSE}
 set.seed(6687) 
 elections_red <- elections_clean %>%
   sample_n(10000)
 ```
+
+Using the random sample of 10,000 observations, we began the model selection process. See Appendix A for the full backward selection model output.
 
 ```{r backward-selection, include=FALSE}
 int_only_model <- glm(voted ~ 1,
@@ -431,24 +433,24 @@ marst + Presidential_Election_Status + AGE + highest_education.
 The final model is: 
 
 
-The backward selection based on AIC took out the variables metro, veteran, and hispanic_status.
+The backward selection based on AIC took out the variables metro, veteran, and hispanic_status (see Appendix A).
 
 Interpretation of coefficients of interest:
 
-Baseline: Female, married, native born, not employed, Bachelors Degree is highest education, not currently enrolled in school if between the age of 16-24, white, and the time of voting is midterm following the election of an incumbent president.
+Baseline: Female, married, native born, not employed, Bachelors Degree is highest education, not currently enrolled in school if between the age of 16-24, White, and the time of voting is midterm following the election of an incumbent president.
 
 
-We expect the odds of an eligible voter voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of an eligible voter voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
-For each additional year in age, we expect the odds of an eligible voter voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+For each additional year in age, we expect the odds of an eligible voter voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
-We expect the odds of an eligible voter voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, white, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of an eligible voter voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
-### Checking Model Conditions 
+## Checking Model Conditions
 
-#Linearity
+**Linearity**
 
-```{r model-conditions-1}
+```{r model-conditions-1, include=FALSE}
 elections_red %>%
   count(sex, voted) %>%
   group_by(sex) %>%
@@ -466,44 +468,43 @@ elections_red %>%
   kable()
 ```
 
-According to the plot below, there is a linear relationship between the
-empirical logit and the predictor variable age. Hence linearity is satisfied 
+According to the empirical logit plot (see Appendix B), there is a linear relationship between the empirical logit and the predictor variable age. Hence linearity is satisfied 
 for AGE.
 
-```{r logit, fig.height=4, fig.width=6}
+```{r logit, fig.height=4, fig.width=6, include=FALSE}
 library(Stat2Data)
 emplogitplot1(voted ~ AGE, data = elections_red, 
               ngroups = 10)
 ```
 
-## Randomness
+**Randomness**
+
 It is possible that randomness is not satisfied because our data is
 from the census survey, which may not be random (ie might select for people who
 have time to fill it out). However, there is no reason to believe that this will not generalize to the US population as a whole in a significant way, particularly due to the large sample size.
 
-## Independence
-Independence may be violated because geographic location may
-influence voting due to factors such as (residuals by state ID). Hence, we will
-look at misclassification rate by region.
+**Independence**
 
-```{r fip-new}
+Independence may be violated because geographic location may influence voting due to factors such as (residuals by state ID). Hence, we will look at misclassification rate by region.
+
+```{r fip-new, include=FALSE}
 library(maps)
 data(state.fips)
 joined_fips <- left_join(elections_red, state.fips, by = c("STATEFIP" = "fips"))
 ```
 
-```{r augment}
+```{r augment, include=FALSE}
 model_aug <- augment(best_model, type.predict = "response") #probability
 ```
 
-Here, we create a confusion matrix with a misclassification rate of 0.5.
+Here, we create a confusion matrix with a decision threshold of 0.5.
 
 ```{r predicted}
 model_aug <- model_aug %>% 
   mutate(predicted_voted = if_else(.fitted > 0.5, "Will Vote", "Will Not Vote"))
 ```
 
-We will left join with region to look at misclassification rates by region.
+We will join the augmented data with region in order to look at misclassification rates by region.
 
 ```{r join}
 tojoin <- joined_fips %>% 
@@ -512,7 +513,8 @@ tojoin <- joined_fips %>%
 aug_fips <- left_join(model_aug, tojoin, by ="AGE")
 ```
 
-Below are the misclassification rates by region.
+Below is a table of the misclassification rates by region.
+
 ```{r misclassification-rates-by-region}
 aug_fips <- aug_fips %>% 
   mutate(region = case_when(region == 1 ~ "Northeast",
@@ -534,10 +536,10 @@ missclassification %>%
 
 *Consulted Census data for the region fips number corresponding to region name [3]*
 
-We plan to create a plot of misclassification rate by region to determine if 
-independence is satisfied.
+We then created a plot of misclassification rate by region to determine if 
+independence is satisfied. See the Appendix B for the boxplot visualizing the misclassification rates by region.
 
-```{r boxplot-misclassification}
+```{r boxplot-misclassification, include=FALSE}
 aug_fips %>% 
   group_by(region) %>% 
   count(voted, predicted_voted) %>% 
@@ -550,15 +552,16 @@ Based on the misclassification rates, we have no reason to believe that the inde
 
 ## Checking for influential points
 
-```{r obs-num}
+```{r obs-num, include=FALSE}
 best_aug <- augment(best_model) %>%
    mutate(obs_num = row_number()) #add row number to help with graphing
 ```
 
-## Cook's distance
-We will also look for influential points using Cook's Distance.
+**Cook's distance**
 
-```{r Cooks-D, fig.height=3, fig.width=6}
+We will also look for influential points using Cook's Distance. See the plot for Cook's distance in Appendix B. 
+
+```{r Cooks-D, fig.height=3, fig.width=6, include=FALSE}
 ## scatterplot of Cook's D vs. observation number
 ggplot(data = best_aug, aes(x = obs_num, y = .cooksd)) +
   geom_point(alpha = 0.7) +
@@ -568,13 +571,11 @@ ggplot(data = best_aug, aes(x = obs_num, y = .cooksd)) +
                            as.character(obs_num), "")), nudge_x = 1)
 ```
 
-According to Cook's Distance, there are no influential points, so all points can be left in the model.
+According to the plot of Cook's Distance (see Appendix B), there are no influential points, so all points can be left in the model.
 
-## Multicollinearity
+**Multicollinearity**
 
-VIF:
-
-```{r VIF}
+```{r VIF, include=FALSE}
 # load rms package and calculate VIF
 library(rms)
 vif(best_model) %>% 
@@ -583,10 +584,10 @@ vif(best_model) %>%
   kable(digits = 3)
 ```
 
-All of the VIF values are under the threshold of 10, indicating that there is no evidence of multicollinearity in our data.
+All of the VIF values are under the threshold of 10 (see table in Appendix B), indicating that there is no evidence of multicollinearity in our data.
 
 
-### Interaction Terms
+## Interaction Terms
 
 We will add in several interaction terms of interest to us and use a drop-in-deviance test to see if they are meaningful predictors of the odds of someone voting.
 
@@ -619,7 +620,6 @@ tidy(full_model) %>%
   kable(digits = 3)
 ```
 
-
 ```{r drop-in-deviance1}
 anova(reduced_model, full_model, test = "Chisq") %>%
   tidy() %>% 
@@ -639,7 +639,7 @@ indicating that this effect would mean that during a presidential election for
 an individual with the highest level of education as a High School Degree/GED,
 they are less likely to vote than individuals that are female, married, native
 born, not employed, have Bachelors Degree as their highest education, 
-not currently enrolled in school if between the age of 16-24, white, and 
+not currently enrolled in school if between the age of 16-24, White, and 
 the election is a midterm election following the election of an incumbent 
 president.
 
@@ -649,7 +649,7 @@ The coefficient is positive, indicating that this effect would mean that during
 a presidential election for an individual that is Black, they are more likely to
 vote than individuals that are female, married, native born, not employed, have
 Bachelors Degree as their highest education,  not currently enrolled in school
-if between the age of 16-24, white, and the election is a midterm election
+if between the age of 16-24, White, and the election is a midterm election
 following the election of an incumbent president
 
 
@@ -686,26 +686,67 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
   tidy() %>% 
   kable(digits = 3)
 ```
+
 From the drop-in-deviance test to include variable sex, the p-value is greater
 than an alpha-level of 0.10, so we will exclude sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
 
-```{r}
+# Results
+
+```{r final-voting-model}
 voting_model <- sex_excluded
 
 tidy(voting_model) %>%
   kable(digits=3)
 ```
 
-##Creating Classifier
+## Checking Model Conditions for Final Model
+
+### Checking for influential points
+
+```{r obs-num-final}
+final_best_aug <- augment(voting_model) %>%
+   mutate(obs_num = row_number()) #add row number to help with graphing
+```
+
+**Cook's distance**
+
+We will also look for influential points in our final model using Cook's Distance.
+
+```{r Cooks-final, fig.height=3, fig.width=6, include=FALSE}
+## scatterplot of Cook's D vs. observation number
+ggplot(data = final_best_aug, aes(x = obs_num, y = .cooksd)) +
+  geom_point(alpha = 0.7) +
+  geom_hline(yintercept = c(0.5,1), color = "red", lty = 2) +
+  labs(x = "Observation Number", y = "Cook's D") +
+  geom_text(aes(label = ifelse(.hat > 0.5,
+                           as.character(obs_num), "")), nudge_x = 1)
+```
+
+According to the Cook's Distance plot for the final model (see Appendix C), there are no influential points, so all points can be left in the final model.
+
+**Multicollinearity**
+
+```{r VIF-final, include=FALSE}
+# load rms package and calculate VIF
+library(rms)
+vif(voting_model) %>% 
+  tidy() %>% 
+  arrange(x) %>% 
+  kable(digits = 3)
+```
+
+All of the VIF values are under the threshold of 10 (see Appendix C), indicating that there is no evidence of multicollinearity in our final model.
+
+## Creating Classifier
 
 We'll fit an ROC curve to help us determine a decision-making threshold. 
 
-```{r}
+```{r augment-for-roc}
 voting_aug <- augment(voting_model, type.predict = "response") %>%
   mutate(voted = fct_relevel(voted, c("1", "0")))
 ```
 
-```{r}
+```{r calculate-threshold-levels}
 library(broom)
 library(yardstick)
 
@@ -715,13 +756,14 @@ roc_curve_data <- voting_aug %>%
   mutate(pred_prob = exp(.threshold)/(1 + exp(.threshold)))
 ```
 
-```{r}
+```{r roc-curve-plot}
 autoplot(roc_curve_data)
 ```
+
 Below we look at values within a range of thresholds in order to choose the 
 threshold that max specificity and and sensitivity.
 
-```{r}
+```{r roc-curve-threshold}
 roc_curve_data %>%
   filter(.threshold > .30, .threshold < .45)
 ```
@@ -735,13 +777,184 @@ Any data point with a probability over 0.60 will be predicted to be in
 the "voted" category.
 
 
-## Discussion 
+# Discussion 
+
+While completing this project provided excellent insight into the voting patterns in the United States, there are several limitations of this project that must be acknowledged. First, the original dataset hard-coded several variables with "unknown" and "missing" combined into one category. This could have obscured the effects of missingness in our data and contributed to decreasing the predictive accuracy of our model and results. For this reason, if given the opportunity to expand this project, we would like to explore missingness in our dataset and its implications with more depth to improve our model. Because several categorical variables already had levels that combined missing and unknown, we decided to code the other variables in the same way, effectively imputing a new category for missing that was used in the model. While this was the best way to deal with missingness within the scope of this project, we would be interested in expanding this in the future and teasing out missing from unknown to create a more accurate model and improve our results.
+
+# References
+
+[1] “GGPlot Cheat Sheet for Great Customization - Articles - STHDA.” http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/ (November 15, 2020).
+
+[2] “The A - Z Of Rcolorbrewer Palette You Must Know.” 2018. Datanovia. https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/ (November 15, 2020).
+
+[3] Prepared by the Geography Division of the U.S. Census Bureau. “Census Regions and Divisions of the United States.” https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf.
+
+[4] “How to Put Labels over Geom_bar for Each Bar in R with Ggplot2.” Stack Overflow. https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 (November 15, 2020).
 
 
+# Appendix A
 
-[1] http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/#use-themes-in-ggplot2-package
-[2] https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/
-[3] https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
-[4] https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 
+## Backward Selection Output
 
-*keep in mind: citizenship and registration exclusion for the model*
+```{r backward-selection-appendix}
+int_only_model <- glm(voted ~ 1,
+                     data = elections_red,
+                      family = "binomial")
+
+full_model <- glm(voted ~ metro + sex + marst + veteran+ citizen + 
+                   hispanic_status + employed + highest_education + 
+                   current_student + race + AGE + Presidential_Election_Status
+                 + YEAR,
+                     data = elections_red,
+                      family = "binomial")
+
+best_model <- step(full_model, scope=formula(int_only_model), 
+                   direction = "backward")
+
+```
+
+# Appendix B
+
+## Checking Model Conditions for the resulting model from the selection process
+
+### Linearity
+
+```{r model-conditions-1-linearity}
+elections_red %>%
+  count(sex, voted) %>%
+  group_by(sex) %>%
+  mutate(prop = n/sum(n)) %>%
+  filter(voted == "1") %>%
+  mutate(emp_logit = log(prop/(1-prop))) %>% 
+  kable()
+
+elections_red %>%
+  count(marst, voted) %>%
+  group_by(marst) %>%
+  mutate(prop = n/sum(n)) %>%
+  filter(voted == "1") %>%
+  mutate(emp_logit = log(prop/(1-prop))) %>% 
+  kable()
+```
+
+```{r logit-appendix, fig.height=4, fig.width=6}
+library(Stat2Data)
+emplogitplot1(voted ~ AGE, data = elections_red, 
+              ngroups = 10)
+```
+
+### Independence
+
+**Misclassification rate by region**
+
+```{r fip-new-appendix}
+library(maps)
+data(state.fips)
+joined_fips <- left_join(elections_red, state.fips, by = c("STATEFIP" = "fips"))
+
+model_aug <- augment(best_model, type.predict = "response") #probability
+
+model_aug <- model_aug %>% 
+  mutate(predicted_voted = if_else(.fitted > 0.5, "Will Vote", "Will Not Vote"))
+
+tojoin <- joined_fips %>% 
+  select(AGE, region)
+
+aug_fips <- left_join(model_aug, tojoin, by ="AGE")
+```
+
+```{r misclassification-rates-by-region-appendix}
+aug_fips <- aug_fips %>% 
+  mutate(region = case_when(region == 1 ~ "Northeast",
+                            region == 2 ~ "Midwest",
+                            region == 3 ~ "South",
+                            region == 4 ~ "West"))
+# used Census data for the region fips number corresponding to region name [3]
+
+missclassification <- aug_fips %>% 
+  group_by(region) %>% 
+  count(voted, predicted_voted) %>%  
+  #all combs of responses specified as arguments
+  mutate(prop = n / sum(n)) %>% 
+  filter(voted == 1 & predicted_voted == "Will Not Vote" | 
+        voted == 0 & predicted_voted == "Will Vote")
+missclassification %>% 
+  kable()
+```
+
+*Consulted Census data for the region fips number corresponding to region name [3]*
+
+**Boxplot of misclassification rate by region**
+
+```{r boxplot-misclassification-appendix}
+aug_fips %>% 
+  group_by(region) %>% 
+  count(voted, predicted_voted) %>% 
+  #all combs of responses specified as arguments
+  ggplot(aes(x = predicted_voted, y = n, color = region)) +
+  geom_boxplot()
+```
+
+## Checking for influential points
+
+```{r obs-num-appendix}
+best_aug <- augment(best_model) %>%
+   mutate(obs_num = row_number()) #add row number to help with graphing
+```
+
+## Cook's distance plot
+
+```{r Cooks-D-appendix, fig.height=3, fig.width=6}
+## scatterplot of Cook's D vs. observation number
+ggplot(data = best_aug, aes(x = obs_num, y = .cooksd)) +
+  geom_point(alpha = 0.7) +
+  geom_hline(yintercept = c(0.5,1), color = "red", lty = 2) +
+  labs(x = "Observation Number", y = "Cook's D") +
+  geom_text(aes(label = ifelse(.hat > 0.5,
+                           as.character(obs_num), "")), nudge_x = 1)
+```
+
+**Multicollinearity: VIF Table**
+
+```{r VIF-appendix}
+# load rms package and calculate VIF
+library(rms)
+vif(best_model) %>% 
+  tidy() %>% 
+  arrange(x) %>% 
+  kable(digits = 3)
+```
+
+# Appendix C
+
+## Checking Model Conditions for the Final Model
+
+### Checking for influential points
+
+```{r obs-num-final-appendix}
+final_best_aug <- augment(voting_model) %>%
+   mutate(obs_num = row_number()) #add row number to help with graphing
+```
+
+**Cook's distance plot for final model**
+
+```{r Cooks-final-appendix, fig.height=3, fig.width=6}
+## scatterplot of Cook's D vs. observation number
+ggplot(data = final_best_aug, aes(x = obs_num, y = .cooksd)) +
+  geom_point(alpha = 0.7) +
+  geom_hline(yintercept = c(0.5,1), color = "red", lty = 2) +
+  labs(x = "Observation Number", y = "Cook's D") +
+  geom_text(aes(label = ifelse(.hat > 0.5,
+                           as.character(obs_num), "")), nudge_x = 1)
+```
+
+**Multicollinearity: VIF Table for final model**
+
+```{r VIF-final-appendix}
+# load rms package and calculate VIF
+library(rms)
+vif(voting_model) %>% 
+  tidy() %>% 
+  arrange(x) %>% 
+  kable(digits = 3)
+```
