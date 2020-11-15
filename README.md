@@ -1,10 +1,8 @@
-# project
+# What makes someone more likely to vote? Using logistic regression to calculate predicted probabilities for whether someone will vote. 
 
 [Project](https://sta210-fa20.netlify.app/project/) for STA 210, Fall 2020
 
-**What makes someone more likely to vote? An exploration of predicting whether someone will vote using logistic regression**
-
-A project by team Approximately Normal
+**A project by team Approximately Normal**
 
 In this project, we investigated voter turnout rates over a 14-year period. We 
 used data from IPUMS and the American Statistical Association that that were 
