@@ -1,5 +1,5 @@
 ---
-title: "Final Written Report"
+title: "Final Written Report: What makes someone more likely to vote?"
 author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
 date: "17 November 2020"
 output: pdf_document
