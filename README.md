@@ -45,7 +45,7 @@ Based on information found in the 2020 Fall Data Challenge codebook [3].
 * `STATEFIP`: state identification in FIP format
 * `AGE`: respondent age at their last birthday
 * `Presidential_Election_Status`: type of election 
-  + presidential election, Midterm Following Incumbent President, or a Midterm Following New President
+  + Presidential election, Midterm Following Incumbent President, or a Midterm Following New President
 * `Is_Presidential_Election`: binary variable for whether the election was a presidential election
 
 [1] https://ipums.org/what-is-ipums
