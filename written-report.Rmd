@@ -1,5 +1,5 @@
 ---
-title: "Written Report Draft"
+title: "Final Written Report"
 author: "Approximately Normal: Jenny Huang, Bella Larsen, Jessie Bierschenk, Aidan Gildea"
 date: "17 November 2020"
 output: pdf_document
