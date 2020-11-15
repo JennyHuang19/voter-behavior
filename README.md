@@ -20,7 +20,7 @@ wasted resources by only sending mailers to the people who are not likely to
 vote using a decision threshold based on our final model.
 
 **Dataset Dimensions**
-The original dataset (called data_full) has 28 variables and 643,429 observations. We cleaned the data for our project purposes and created a new dataset (called elections_clean) that has 22 variables and 643,429 observations. To complete model selection and analysis, we used a random sample of 10,000 observations. The following codebook is for the variables in the cleaned dataset that we created. 
+The original dataset (called `data_full`) has 28 variables and 643,429 observations. We cleaned the data for our project purposes and created a new dataset (called `elections_clean`) that has 22 variables and 643,429 observations. To complete model selection and analysis, we used a random sample of 10,000 observations. The following codebook is for the variables in the cleaned dataset that we created. 
 
 **Codebook**
 Based on information found in the 2020 Fall Data Challenge codebook [3].
