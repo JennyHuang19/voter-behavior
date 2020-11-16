@@ -216,7 +216,7 @@ From the barplot above, it is clear the more individuals in the data set voted (
 
 As college students ourselves, we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
 
-```{r EDA1, fig.height=4, fig.width=6}
+```{r EDA1, fig.height=3, fig.width=5}
 EDA1 <- elections_clean %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
@@ -226,7 +226,7 @@ EDA1 <- elections_clean %>%
         panel.grid.major = element_line(color = "Navy Blue", size=.1))+
   #see scale fill brewer code inspiration from reference 1
   scale_fill_brewer(palette = "Blues") +
-  labs(title = "Voting Distribution of Population of 16-24 Year Olds", 
+  labs(title = "Voting Distribution of 16-24 Year Olds", 
        y = "Count", x = "Voted", 
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
@@ -246,14 +246,15 @@ elections_clean %>%
   count()  %>% 
   ungroup() %>%
   mutate(prop = n/sum(n)) %>%
-  kable(digits = 3)
+  kable(digits = 3, 
+  caption = "Proportion of Respondents Not Currently Enrolled In School By Age")
 ```
 
 From the table above, it is apparent that more than 40% of those not currently enrolled in school are 23-24 years old. This could be a potential reason for why this age range includes so many who are not currently enrolled as a student. 
 
 To more meaningfully analyze the relationship between being a student and if they vote or not, we adjusted our visualization to only include those currently enrolled in some level of education. This is seen in the visualization below. 
 
-```{r EDA2, fig.height=4, fig.width=6}
+```{r EDA2, fig.height=3, fig.width=5}
 EDA2 <- elections_clean %>% 
   filter(current_student != "Not currently enrolled") %>% 
   ggplot(aes(x = voted, fill = current_student)) +
@@ -263,8 +264,7 @@ EDA2 <- elections_clean %>%
         plot.subtitle = element_text(face = 4, color = "grey54"),
         panel.grid.major = element_line(color = "Navy Blue", size=.1))+
   scale_fill_brewer(palette="Blues") +
-  labs(title = "Voting Distribution of Population of 16-24 Year Olds 
-Enrolled in School", 
+  labs(title = "Voting Distribution of 16-24 Year Olds \nEnrolled in School", 
        y = "Count", x = "Voted", 
        subtitle = "Examining relationship between student status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
@@ -274,7 +274,7 @@ EDA2
 
 This visualization shows that eligible voters between the age 16-24 enrolled in some education at the time were mainly full time college students. More full time and part time college students that were eligible to vote did vote compared to those that did not vote. The opposite is true for high school students: more full time and part time high school students that were eligible to vote did not vote compared to those that did vote. 
 
-```{r EDA3, fig.height=4.3, fig.width=6}
+```{r EDA3, fig.height=3, fig.width=5}
 citizen_plot <- elections_clean %>% 
   group_by(citizen) %>% 
   count(voted) %>% 
@@ -284,7 +284,7 @@ citizen_plot <- elections_clean %>%
 citizen_plot %>% 
   ggplot(aes(x = voted, y = prop, fill = citizen)) +
   geom_bar(stat = "identity") +
-  geom_text(aes(label = prop), vjust = -0.05) + 
+  geom_text(aes(label = prop), vjust = 0.5) + 
   #see geom_text() code inspiration in reference [4]*
   facet_grid(cols = vars(citizen))+
   scale_fill_brewer(palette = "Blues") +
@@ -298,7 +298,7 @@ citizen_plot %>%
 
 *see geom_text() code inspiration in reference [4]*
 
-This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized.
+This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized. For a similar plot comparing respondents by veteran status, please consult Appendix A.
 
 ```{r EDA4, fig.height=3, fig.width=5}
 elections_clean %>% 
@@ -314,30 +314,6 @@ elections_clean %>%
 ```
 
 This box plot shows that eligible voters that did vote were generally older than eligible voters that did not vote.
-
-```{r EDA5, fig.height=4.3, fig.width=6}
-veteran_plot <- elections_clean %>% 
-  group_by(veteran) %>% 
-  count(voted) %>% 
-  mutate(total = sum(n)) %>% 
-  mutate(prop = n/total) %>% 
-  mutate(prop = round(prop, 3))
-veteran_plot %>% 
-  ggplot(aes(x = voted, y = prop, fill = veteran)) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label = prop), vjust = -0.05) +
-  #see geom_text() code inspiration in reference [4]*
-  facet_grid(cols = vars(veteran))+
-  scale_fill_brewer(palette = "Blues") +
-  labs(title = "Voting distribution based on veteran status", 
-       y = "Proportion", x = "Voted", 
-     subtitle = "Examining relationship between veteran status and voting",
-       caption = "0 = Did not Vote, 1 = Voted",
-       fill = "Veteran Status") +
-  theme_bw()
-```
-
-*see geom_text() code inspiration in reference [4]*
 
 We are also interested in looking at how voter turnout has changed over the
 years.
@@ -367,7 +343,7 @@ elections_year %>%
 
 We decided to look at the scatterplot of voter turnout over time broken down by the status of the election (Presidential election, midterm after incumbent president, or midterm after new president) to see how it may differ depending on the election.
 
-```{r scatterplot-over-time, fig.height=4, fig.width=6.5}
+```{r scatterplot-over-time, fig.height=3, fig.width=6}
 elections_year %>% 
   mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
                                                           2012, 2016) ~ 
@@ -403,7 +379,7 @@ elections_red <- elections_clean %>%
   sample_n(10000)
 ```
 
-Using the random sample of 10,000 observations, we began the model selection process. See Appendix A for the full backward selection model output.
+Using the random sample of 10,000 observations, we began the model selection process. See Appendix B for the full backward selection model output.
 
 ```{r backward-selection, include=FALSE}
 int_only_model <- glm(voted ~ 1,
@@ -433,7 +409,7 @@ marst + Presidential_Election_Status + AGE + highest_education.
 The final model is: 
 
 
-The backward selection based on AIC took out the variables metro, veteran, and hispanic_status (see Appendix A).
+The backward selection based on AIC took out the variables metro, veteran, and hispanic_status (see Appendix B).
 
 Interpretation of coefficients of interest:
 
@@ -468,7 +444,7 @@ elections_red %>%
   kable()
 ```
 
-According to the empirical logit plot (see Appendix B), there is a linear relationship between the empirical logit and the predictor variable age. Hence linearity is satisfied 
+According to the empirical logit plot (see Appendix C), there is a linear relationship between the empirical logit and the predictor variable age. Hence linearity is satisfied 
 for AGE.
 
 ```{r logit, fig.height=4, fig.width=6, include=FALSE}
@@ -531,13 +507,13 @@ missclassification <- aug_fips %>%
   filter(voted == 1 & predicted_voted == "Will Not Vote" | 
         voted == 0 & predicted_voted == "Will Vote")
 missclassification %>% 
-  kable()
+  kable(digits = 3, caption = "Missclassification Rates by Region")
 ```
 
 *Consulted Census data for the region fips number corresponding to region name [3]*
 
 We then created a plot of misclassification rate by region to determine if 
-independence is satisfied. See the Appendix B for the boxplot visualizing the misclassification rates by region.
+independence is satisfied. See the Appendix C for the boxplot visualizing the misclassification rates by region.
 
 ```{r boxplot-misclassification, include=FALSE}
 aug_fips %>% 
@@ -559,7 +535,7 @@ best_aug <- augment(best_model) %>%
 
 **Cook's distance**
 
-We will also look for influential points using Cook's Distance. See the plot for Cook's distance in Appendix B. 
+We will also look for influential points using Cook's Distance. See the plot for Cook's distance in Appendix C. 
 
 ```{r Cooks-D, fig.height=3, fig.width=6, include=FALSE}
 ## scatterplot of Cook's D vs. observation number
@@ -571,7 +547,7 @@ ggplot(data = best_aug, aes(x = obs_num, y = .cooksd)) +
                            as.character(obs_num), "")), nudge_x = 1)
 ```
 
-According to the plot of Cook's Distance (see Appendix B), there are no influential points, so all points can be left in the model.
+According to the plot of Cook's Distance (see Appendix C), there are no influential points, so all points can be left in the model.
 
 **Multicollinearity**
 
@@ -584,7 +560,7 @@ vif(best_model) %>%
   kable(digits = 3)
 ```
 
-All of the VIF values are under the threshold of 10 (see table in Appendix B), indicating that there is no evidence of multicollinearity in our data.
+All of the VIF values are under the threshold of 10 (see table in Appendix C), indicating that there is no evidence of multicollinearity in our data.
 
 
 ## Interaction Terms
@@ -623,7 +599,8 @@ tidy(full_model) %>%
 ```{r drop-in-deviance1}
 anova(reduced_model, full_model, test = "Chisq") %>%
   tidy() %>% 
-  kable(digits = 3)
+  kable(digits = 3, 
+        caption = "Drop-In-Deviance Test Results For Interaction Terms")
 ```
 
 The p-value (7.840e-07) is very small (less than the alpha level 0.05), 
@@ -684,7 +661,7 @@ sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed +
 ```{r drop-in-deviance2}
 anova(sex_excluded, sex_included, test = "Chisq") %>%
   tidy() %>% 
-  kable(digits = 3)
+  kable(digits = 3, caption = "Drop-In-Deviance Test Results For Sex")
 ```
 
 From the drop-in-deviance test to include variable sex, the p-value is greater
@@ -696,7 +673,7 @@ than an alpha-level of 0.10, so we will exclude sex from the model. This contrad
 voting_model <- sex_excluded
 
 tidy(voting_model) %>%
-  kable(digits=3)
+  kable(digits=3, caption = "Final Model Output")
 ```
 
 ## Checking Model Conditions for Final Model
@@ -722,7 +699,7 @@ ggplot(data = final_best_aug, aes(x = obs_num, y = .cooksd)) +
                            as.character(obs_num), "")), nudge_x = 1)
 ```
 
-According to the Cook's Distance plot for the final model (see Appendix C), there are no influential points, so all points can be left in the final model.
+According to the Cook's Distance plot for the final model (see Appendix D), there are no influential points, so all points can be left in the final model.
 
 **Multicollinearity**
 
@@ -735,7 +712,7 @@ vif(voting_model) %>%
   kable(digits = 3)
 ```
 
-All of the VIF values are under the threshold of 10 (see Appendix C), indicating that there is no evidence of multicollinearity in our final model.
+All of the VIF values are under the threshold of 10 (see Appendix D), indicating that there is no evidence of multicollinearity in our final model.
 
 ## Creating Classifier
 
@@ -756,7 +733,7 @@ roc_curve_data <- voting_aug %>%
   mutate(pred_prob = exp(.threshold)/(1 + exp(.threshold)))
 ```
 
-```{r roc-curve-plot}
+```{r roc-curve-plot, fig.height=5, fig.width=3}
 autoplot(roc_curve_data)
 ```
 
@@ -765,7 +742,8 @@ threshold that max specificity and and sensitivity.
 
 ```{r roc-curve-threshold}
 roc_curve_data %>%
-  filter(.threshold > .30, .threshold < .45)
+  filter(.threshold > .419, .threshold < .42) %>% 
+  kable(digits = 3, caption = "ROC Curve Threshold Table")
 ```
 
 According to our ROC curve and modeling objectives, we will choose a threshold
@@ -781,6 +759,8 @@ the "voted" category.
 
 While completing this project provided excellent insight into the voting patterns in the United States, there are several limitations of this project that must be acknowledged. First, the original dataset hard-coded several variables with "unknown" and "missing" combined into one category. This could have obscured the effects of missingness in our data and contributed to decreasing the predictive accuracy of our model and results. For this reason, if given the opportunity to expand this project, we would like to explore missingness in our dataset and its implications with more depth to improve our model. Because several categorical variables already had levels that combined missing and unknown, we decided to code the other variables in the same way, effectively imputing a new category for missing that was used in the model. While this was the best way to deal with missingness within the scope of this project, we would be interested in expanding this in the future and teasing out missing from unknown to create a more accurate model and improve our results.
 
+\newpage
+
 # References
 
 [1] “GGPlot Cheat Sheet for Great Customization - Articles - STHDA.” http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/ (November 15, 2020).
@@ -793,6 +773,32 @@ While completing this project provided excellent insight into the voting pattern
 
 
 # Appendix A
+
+```{r EDA5, fig.height=4.3, fig.width=6}
+veteran_plot <- elections_clean %>% 
+  group_by(veteran) %>% 
+  count(voted) %>% 
+  mutate(total = sum(n)) %>% 
+  mutate(prop = n/total) %>% 
+  mutate(prop = round(prop, 3))
+veteran_plot %>% 
+  ggplot(aes(x = voted, y = prop, fill = veteran)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = prop), vjust = -0.05) +
+  #see geom_text() code inspiration in reference [4]*
+  facet_grid(cols = vars(veteran))+
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Voting distribution based on veteran status", 
+       y = "Proportion", x = "Voted", 
+     subtitle = "Examining relationship between veteran status and voting",
+       caption = "0 = Did not Vote, 1 = Voted",
+       fill = "Veteran Status") +
+  theme_bw()
+```
+
+*see geom_text() code inspiration in reference [4]*
+
+# Appendix B
 
 ## Backward Selection Output
 
@@ -813,7 +819,7 @@ best_model <- step(full_model, scope=formula(int_only_model),
 
 ```
 
-# Appendix B
+# Appendix C
 
 ## Checking Model Conditions for the resulting model from the selection process
 
@@ -826,7 +832,7 @@ elections_red %>%
   mutate(prop = n/sum(n)) %>%
   filter(voted == "1") %>%
   mutate(emp_logit = log(prop/(1-prop))) %>% 
-  kable()
+  kable(digits = 3, caption = "Empirical Logit Results For Sex")
 
 elections_red %>%
   count(marst, voted) %>%
@@ -834,10 +840,10 @@ elections_red %>%
   mutate(prop = n/sum(n)) %>%
   filter(voted == "1") %>%
   mutate(emp_logit = log(prop/(1-prop))) %>% 
-  kable()
+  kable(digits = 3, caption = "Empirical Logit Results For Marital Status")
 ```
 
-```{r logit-appendix, fig.height=4, fig.width=6}
+```{r logit-appendix, fig.height=3, fig.width=5}
 library(Stat2Data)
 emplogitplot1(voted ~ AGE, data = elections_red, 
               ngroups = 10)
@@ -879,20 +885,23 @@ missclassification <- aug_fips %>%
   filter(voted == 1 & predicted_voted == "Will Not Vote" | 
         voted == 0 & predicted_voted == "Will Vote")
 missclassification %>% 
-  kable()
+  kable(digits = 3, caption = "Missclassification Rates by Region")
 ```
 
 *Consulted Census data for the region fips number corresponding to region name [3]*
 
 **Boxplot of misclassification rate by region**
 
-```{r boxplot-misclassification-appendix}
+```{r boxplot-misclassification-appendix, fig.height=3, fig.width=5}
 aug_fips %>% 
   group_by(region) %>% 
   count(voted, predicted_voted) %>% 
   #all combs of responses specified as arguments
   ggplot(aes(x = predicted_voted, y = n, color = region)) +
-  geom_boxplot()
+  geom_boxplot()+
+  labs(title = "Visualizing the Missclassification Rate by Region",
+       x = "Voting Prediction Based on Model", 
+       y = "Count")
 ```
 
 ## Checking for influential points
@@ -925,7 +934,7 @@ vif(best_model) %>%
   kable(digits = 3)
 ```
 
-# Appendix C
+# Appendix D
 
 ## Checking Model Conditions for the Final Model
 
