@@ -400,7 +400,7 @@ best_model <- step(full_model, scope=formula(int_only_model),
 
 ```{r tidy model}
 tidy(best_model) %>% 
-  kable(digits = 3)
+  kable(digits = 3, caption = "Model Resulting From Backward Selection")
 ```
 
 The final model included YEAR + sex + current_student + citizen + employed + race + 
@@ -567,15 +567,16 @@ All of the VIF values are under the threshold of 10 (see table in Appendix C), i
 
 We will add in several interaction terms of interest to us and use a drop-in-deviance test to see if they are meaningful predictors of the odds of someone voting.
 
+The reduced model is the same as the above model titled "Model Resulting From Backward Selection," and the full model is the reduced model plus interactions terms for sex and employment, presidential election status and highest education level, age and presidential election status, sex and presidential election status, and race and presidential election status.
+
 The following hypotheses will be used:
 
-$H_0$: coefficients for the interaction between sex and employment, presidential election status and highest education level, age and presidential election status, sex and presidential election status, and race and presidential election status are all zero
+$H_0$: the coefficients for the interaction between sex and employment, presidential election status and highest education level, age and presidential election status, sex and presidential election status, and race and presidential election status are all zero
 
-$$H_0: \beta_{sex*employed} = \\
-\beta_{Presidential_Election_Status*highest_education} = \\
-\beta_{AGE*Presidential_Election_Status} = \\
-\beta_{sex*Presidential_Election_Status} = \\
-\beta_{race*Presidential_Election_Status} = 0$$
+$H_0:$
+
+$\beta_{sex*employed} = \beta_{Presidential-Election-Status*highest_education} = \beta_{AGE*Presidential-Election-Status} = \beta_{sex*Presidential-Election-Status} = \beta_{race*Presidential-Election-Status} = 0$
+
 $H_a$: at least one of these coefficients for the interaction terms $\neq$ zero
 
 $\alpha = 0.05$
@@ -592,8 +593,6 @@ full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed +
                     race*Presidential_Election_Status,
                      data = elections_red,
                       family = "binomial")
-tidy(full_model) %>% 
-  kable(digits = 3)
 ```
 
 ```{r drop-in-deviance1}
@@ -645,14 +644,34 @@ full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed +
 ```
 
 We will use a drop-in-deviance test to determine whether or not sex is a 
-meaningful variable in the model. 
+meaningful predictor of the odds of someone voting.
+
+The following hypotheses will be used:
+
+$H_0$: the coefficients for the main effect for sex, the interaction between sex and employment, and sex and presidential election status are all zero. All of the coefficients associated with sex are equal to zero.
+
+$H_0:$ $\beta_{sex} =\beta_{sex*employed} = \beta_{sex*Presidential-Election-Status} = 0$
+$H_a$: at least one of these coefficients for the coefficients associated with sex $\neq$ zero
+
+$\alpha = 0.05$
 
 ```{r model-with-sex}
-sex_included <- best_model
+sex_included <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
+                    race + marst + Is_Presidential_Election + AGE + 
+                    highest_education +
+                    Presidential_Election_Status*highest_education + 
+                    AGE*Presidential_Election_Status + 
+                    sex*Presidential_Election_Status + 
+                    race*Presidential_Election_Status,
+                     data = elections_red,
+                      family = "binomial")
 
 sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed + 
-                    race + marst + Presidential_Election_Status + AGE + 
-                    highest_education,
+                    race + marst + Is_Presidential_Election + AGE + 
+                    highest_education +
+                    Presidential_Election_Status*highest_education + 
+                    AGE*Presidential_Election_Status + 
+                    race*Presidential_Election_Status,
                      data = elections_red,
                       family = "binomial")
 ```
@@ -664,8 +683,7 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
   kable(digits = 3, caption = "Drop-In-Deviance Test Results For Sex")
 ```
 
-From the drop-in-deviance test to include variable sex, the p-value is greater
-than an alpha-level of 0.10, so we will exclude sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
+From the drop-in-deviance test to include variable sex, the p-value (0.267) is greater than an alpha-level of 0.10, so we will exclude the main effect for sex and the interaction terms including sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
 
 # Results
 
@@ -738,7 +756,7 @@ autoplot(roc_curve_data)
 ```
 
 Below we look at values within a range of thresholds in order to choose the 
-threshold that max specificity and and sensitivity.
+threshold that yields high sensitivity and low values of (1 - specificity).
 
 ```{r roc-curve-threshold}
 roc_curve_data %>%
@@ -771,6 +789,7 @@ While completing this project provided excellent insight into the voting pattern
 
 [4] “How to Put Labels over Geom_bar for Each Bar in R with Ggplot2.” Stack Overflow. https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 (November 15, 2020).
 
+\newpage
 
 # Appendix A
 
