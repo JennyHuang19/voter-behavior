@@ -186,9 +186,16 @@ elections_clean <- elections_clean %>%
 
 # Introduction and Data
 
+  In our regression analysis, we will be assuming the role of a nonprofit political organization aiming to design the most effective GOTV ("get out the vote") effort possible. Our primary focus is to increase voter turnout, however, as an organization funded solely by donations, we need to make sure our outreach efforts are as financially efficient as possible. Therefore, it is critical that we are sending our mailing literature primarily to those we believe may not vote -- as this will help turnout voters who may not of voted otherwise. To do so, we will conduct a regression analysis that investigates the different factors and characteristics that appear to be involved or related to voters in the U.S. We are using data on voting behaviors in the U.S. over the past 14 years [1]. These data are sourced from IPUMS (an organization that provides census and survey data) and the American Statistical Association (ASA) [2, 1]. These data include 28 variables on more than 640,000 voters in the U.S. The data collected contains voter characteristics such as age, geographic location, sex, race, marital status, employment, citizenship, ethnicity, education, and voting history and tendencies [1]. This information is particularly relevant in exploring what factors may be related to U.S. - Americans voting or not.
+
+  Motivation for our research comes from previous efforts to predict voting behaviors. In an MIT Election data study, researchers describe how understanding voter turnout is important when observing the particular tendencies of certain groups of people as well as factors that motivate individual U.S. citizens to vote [3]. The study highlights general assumptions of voter turnout predictions, noting how higher turnout rates tend to be related to individuals with the following traits: married, white, female, higher education, higher income, older age [3]. The article also addresses how reform may be able to increase voter turnout [3]. In another study done by Harvard graduate student Anthony George Fowler, voter turnout and its implications and repercussions are further examined in the U.S. as well as Australia and Mexico [4]. The study explores the 2008 U.S. election and addresses partisan gaps, voter knowledge (how politically-informed a voter is), and race as main variables of interest in exploring voter tendencies in the U.S. [4]. Both of these studies provide motivation for further and continued investigation into voter data and statistics -- especially for our efforts to understand what populations usually do not make it to the voting booth.
+
+  In anticipation of our GOTV effort, we are interested in predicting whether a person voted or not based on a list of predictor variables including sex, age, marital status, veteran status, citizenship status (native born or naturalized citizen), whether or not someone is Hispanic or Latinx, employment status and more (described in more detail in Section 2). Our proposed research question is: do voter turnout rates depend on these predictors? Which predictors are more impactful than others? We are also interested in looking at voter turnout over time. We will use the predictor (year) to see if there are changes in voter turnout by demographics over time, or perhaps compare models from different time periods to determine how voter trends have changed over time. Our organization's initial hypothesis is that the significant predictors of voter turnout will include age, level of education, whether they voted in previous elections, and race. Based on historical patterns, people in older age categories tended to vote more than people in younger age categories and people with higher levels of education tended to vote more frequently than people with lower levels of education [5]. Finally, if a person has voted previously, we predict they will be more likely to vote again compared to someone who has not voted previously. Taking these hypotheses into consideration, we will explore which factors are most significant in relation to voting attendance. Our findings will hopefully allow us to identify populations that are statistically less likely to vote, informing who we target with our GOTV literature in the future. 
+
+  While our GOTV initiative hopes to turnout people who we determine are unlikely to vote, our statistical analysis will use a broad margin to determine who should receive our informational materials. Every vote matters, so we want to make sure no one gets left behind!  
 We will begin our EDA by visualizing the relationship between the response variable describing whether or not someone voted and several of the other variables of particular interest.
 
-We will begin by simply looking at the distribution of those who voted throughout the last 8 years of elections.
+First, we will simply look at the distribution of those who voted throughout the last 8 years of elections.
 
 
 ```{r EDA, fig.height=3, fig.width=5}
@@ -209,12 +216,12 @@ response_plot <- ggplot(data = elections_clean, aes(x = voted,
 response_plot
 ```
 
-*see theme code inspiration at reference [1]*
-*see scale fill code inspiration at reference [2]*
+*see theme code inspiration at reference [6]*
+*see scale fill code inspiration at reference [7]*
 
 From the barplot above, it is clear the more individuals in the data set voted (voted = 1) than did not (voted = 0).
 
-As college students ourselves, we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
+Many political nonprofits engage with college campuses, so we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
 
 ```{r EDA1, fig.height=3, fig.width=5}
 EDA1 <- elections_clean %>% 
@@ -234,7 +241,7 @@ EDA1 <- elections_clean %>%
 EDA1
 ```
 
-*see scale fill brewer code inspiration from reference [1]*
+*see scale fill brewer code inspiration from reference [6]*
 
 From the bar plot, it is evident that a majority of these individuals were not currently enrolled. This may be a result of a general national trend, but we want to investigate if it is the result of a larger proportion of older individuals within in the range of ages between 16-24. We will investigate this by analyzing those who are not currently enrolled in school within this age range.
 
@@ -296,7 +303,7 @@ citizen_plot %>%
   theme_bw()
 ```
 
-*see geom_text() code inspiration in reference [4]*
+*see geom_text() code inspiration in reference [8]*
 
 This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized. For a similar plot comparing respondents by veteran status, please consult Appendix A.
 
@@ -363,7 +370,9 @@ elections_year %>%
 
 From the above scatterplot, we confirmed that there is higher voter turnout during presidential elections compared to midterm elections. In addition, there is equal or higher voter turnout for midterm elections following the election of a new president compared to midterm elections following the election of an incumbent president, and an especially high voter turnout in the midterm election after Trump's election in 2016.
 
-Finally, it is important to acknowledge that our any missingness in our data, as it may influence the outcome of our regression analysis.
+Finally, it is important to acknowledge that our any missingness in our data, as it may influence the outcome of our regression analysis. The initial data sourced from the This Is Statistics: Fall Data Challenge used non-uniform values for the different variables, therefore we cleaned the data to be more intelligible for our analysis. While cleaning, we did impute "NA" values by either combining them with other categories and/or removing them to improve our analysis. We believe this will not negatively affect out analysis, yet will move forward taking it into consideration. 
+
+After analyzing these preliminary visualizations and observations, we will now begin to build our model. 
 
 # Methodology
 
@@ -510,7 +519,7 @@ missclassification %>%
   kable(digits = 3, caption = "Missclassification Rates by Region")
 ```
 
-*Consulted Census data for the region fips number corresponding to region name [3]*
+*Consulted Census data for the region fips number corresponding to region name [9]*
 
 We then created a plot of misclassification rate by region to determine if 
 independence is satisfied. See the Appendix C for the boxplot visualizing the misclassification rates by region.
@@ -781,13 +790,23 @@ While completing this project provided excellent insight into the voting pattern
 
 # References
 
-[1] “GGPlot Cheat Sheet for Great Customization - Articles - STHDA.” http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/ (November 15, 2020).
+[1]“Fall Data Challenge | This Is Statistics.” n.d. Accessed November 16, 2020. https://thisisstatistics.org/falldatachallenge/.
 
-[2] “The A - Z Of Rcolorbrewer Palette You Must Know.” 2018. Datanovia. https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/ (November 15, 2020).
+[2] University of Minnesota. “What Is IPUMS?” Text. IPUMS. February 7, 2019. https://ipums.org/what-is-ipums.
 
-[3] Prepared by the Geography Division of the U.S. Census Bureau. “Census Regions and Divisions of the United States.” https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf.
+[3] MIT Election Data + Science Lab. n.d. “Voter Turnout.” Accessed November 16, 2020. https://plotly.com/~cwimpy/69/.
 
-[4] “How to Put Labels over Geom_bar for Each Bar in R with Ggplot2.” Stack Overflow. https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 (November 15, 2020).
+[4] Fowler, Anthony George. 2013. “Five Studies on the Causes and Consequences of Voter Turnout,” October. https://dash.harvard.edu/handle/1/11156810.
+
+[5] McDonald, Michael. n.d. “Voter Turnout Demographics - United States Elections Project.” Accessed November 16, 2020. http://www.electproject.org/home/voter-turnout/demographics.
+
+[6] “GGPlot Cheat Sheet for Great Customization - Articles - STHDA.” http://www.sthda.com/english/articles/32-r-graphics-essentials/125-ggplot-cheat-sheet-for-great-customization/ (November 15, 2020).
+
+[7] “The A - Z Of Rcolorbrewer Palette You Must Know.” 2018. Datanovia. https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/ (November 15, 2020).
+
+[8] “How to Put Labels over Geom_bar for Each Bar in R with Ggplot2.” Stack Overflow. https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 (November 15, 2020).
+
+[9] Prepared by the Geography Division of the U.S. Census Bureau. “Census Regions and Divisions of the United States.” https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf.
 
 \newpage
 
