@@ -596,7 +596,7 @@ $\beta_{sex*employed} = \beta_{Election*highest_education} = \beta_{sex*Election
 
 $H_a$: at least one of these coefficients for the interaction terms $\neq$ zero
 
-$\alpha = 0.05$
+$\alpha = 0.01$
 
 ```{r interaction}
 reduced_model <- best_model
@@ -677,6 +677,7 @@ The following hypotheses will be used:
 $H_0$: the coefficients for the main effect for sex, the interaction between sex and employment, and sex and election type are all zero. All of the coefficients associated with sex are equal to zero.
 
 $H_0:$ $\beta_{sex} =\beta_{sex*employed} = \beta_{sex*Presidential-Election-Status} = 0$
+
 $H_a$: at least one of these coefficients for the coefficients associated with sex $\neq$ zero
 
 $\alpha = 0.05$
@@ -707,7 +708,7 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
   kable(digits = 3, caption = "Drop-In-Deviance Test Results For Sex")
 ```
 
-From the drop-in-deviance test to include variable sex, the p-value (0.138) is greater than an alpha-level of 0.10, so we will exclude the main effect for sex and the interaction terms including sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
+From the drop-in-deviance test to include variable sex, the p-value (0.138) is greater than an alpha-level of 0.05, so we will exclude the main effect for sex and the interaction terms including sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
 
 # Results
 
@@ -719,6 +720,8 @@ tidy(voting_model) %>%
 ```
 Variables of interest:
 ###What is baseline with interaction terms
+
+By considering the interaction terms added to our final model, we can see that race is a significant predictor of the odds of someone voting. More specifically, the impact of race on the odds of someone voting differs between presidential and midterm elections. For example, if you hold race to be Black and it’s a midterm election, odds of voting decreases by `r round(exp(0.494), 3)` (exp(0.494), p < 0.05) compared to if it’s a presidential election year.
 
 
 ## Checking Model Conditions for Final Model
@@ -827,7 +830,18 @@ the "voted" category and will therefore not be sent a mailer.
 
 # Discussion 
 
+In completing this project, we were able to identify several strong predictors of voting behavior in the United States. Overall, the strongest predictors of the odds of someone voting were the variables associated with education, type of election (presidential or midterm), age, citizenship status (naturalized or native-born), employment status, and marital status. The predictor variables associated with education were especially intriguing, because their statistical significance highlights the huge impact of enrollment in education in the U.S., as well as the immense disparities baked into the U.S. formal education system. For example, based on our final model, we can see that the odds of voting for respondents between the ages of 16 to 24 who are currently enrolled in high school full-time are expected to be about `r round(exp(1.155), 3)` (exp(1.155), p < 0.05) times the odds for those who are not currently enrolled in school, holding all other predictor variables constant. Similarly, the odds of voting for respondents between the ages of 16 to 24 who are currently enrolled in college full-time are expected to be about `r round(exp(0.455), 3)` (exp(0.455), p < 0.05) times the odds for those who are not currently enrolled in school, holding all other predictor variables constant. The p-value for the individuals aged 16 to 24 enrolled part-time in high school is about 0.756, which means that there is not sufficient evidence that the odds of voting for those enrolled in high school part-time differ significantly from those who are not enrolled in school, given an alpha level of 0.05. 
+
+We see the disparities in voter turnout persist past the age group of younger students (16 to 24 years old), as many of the coefficients associated with the highest level of education attained over the respondent's lifetime are significantly different than the baseline level of a bachelor's degree. The odds of voting for individuals who have a high school degree or a GED, some college, some high school, no degree or responded "unknown," or an associate's degree are expected to be smaller by a statistically significant multiplicative factor than individuals with a bachelor's degree. In comparison, the odds of voting for individuals who have a master's degree or a professional degree are expected to be larger by a statistically significant multiplicative factor than individuals with a bachelor's degree. These results suggest that policymakers should consider interventions to help engage the population who are not enrolled in formal education and those who are enrolled in high school part-time in the voting process. Furthermore, these results confirm that there are persistent educational disparities that significantly affect politics in the U.S.
+
+The predictor variable for employment status is the best indicator for socioeconomic status in our final model. We can see that employment status is a significant predictor of the odds of voting. More specifically, the odds of voting for those who are employed are expected to be `r round(exp(0.395), 3)` (exp(0.395), p < 0.05) times the odds for those who are not employed, holding all other predictor variables constant. This indicates that in additional to interventions targeting educational factors, policymakers and voting organizations should consider targeting individuals who are not employed, and perhaps by extension, individuals of lower socioeconomic status. A future research project expanding on this work could consider additional indicators of socioeconomic status, perhaps by Census tract if more granular data is not available. We know that aspects of socioeconomic status and education are tightly intertwined, so it is not necessarily surprising that we see similar results across school-aged individuals who are not enrolled in formal education and individuals who are not employed. 
+
+Additionally, it is known that young voters are a particularly important demographic to target to increase voter turnout [10]. Our data reflect this established fact; based on our model, for each additional year in age, the odds voting are expected to multiply by a factor of `r round(exp(0.040), 3)` (exp(0.040), p < 0.05), holding all other predictor variables constant. This result, coupled with the finding that the odds of voting are greater for individuals enrolled in formal education, suggest that there needs to be intervention at an even earlier age to increase voter turnout. Perhaps by increasing access to early education, increasing financial support of students through high school and college, and increasing messaging about voting to younger individuals, the voter turnout could be increased. We also used our model to address voter turnout from a more policy angle by taking on the role of a “Get Out the Vote” organization. We determined that our model could inform a decision threshold of  0.716 to optimize the decision making process of sending out informational mailers about voting. 
+
 While completing this project provided excellent insight into the voting patterns in the United States, there are several limitations of this project that must be acknowledged. First, the original dataset hard-coded several variables with "unknown" and "missing" combined into one category. This could have obscured the effects of missingness in our data and contributed to decreasing the predictive accuracy of our model and results. For this reason, if given the opportunity to expand this project, we would like to explore missingness in our dataset and its implications with more depth to improve our model. Because several categorical variables already had levels that combined missing and unknown, we decided to code the other variables in the same way, effectively imputing a new category for missing that was used in the model. While this was the best way to deal with missingness within the scope of this project, we would be interested in expanding this in the future and teasing out missing from unknown to create a more accurate model and improve our results.
+
+Additionally, there are several aspects of our modeling process that had limitations that we would like to address. Our primary modeling objective for this project was explanation. We wanted to understand all of the different factors that influence voter turnout, especially given such a rich dataset with so many interesting variables. Thus, we spent a lot of time interpreting our coefficients and ensuring that we did not have issues of multicollinearity in our model using a table of VIF values. However, we also wanted to expand our project to include an element of prediction by determining a decision threshold for whether or not to send an informational voting mailer to different individuals based on the predicted probability of them voting using our model. We acknowledge that this conflicts our original modeling goal of explanation, which could reduce the predictive accuracy of our model for this purpose, given that we kept several variables that were not statistically significant in our model for the purposes of interpretation. However, we believe that this choice is still consistent with the goal of sending mailers to individuals because this decision is relatively low-stakes, and false-negatives and false-positives do not have impactful consequences. Nonetheless, if given the chance to expand this project, we would address this limitation by creating a second model with the goal of prediction in mind. For this model, we would only keep the strongest predictors of the response variable, whether someone will vote, to reduce the prediction intervals and improve the classifier we created. Overall, this project allowed us to better understand the impact of different predictor variables on the odds of whether someone votes, and it allowed us to use our model to make an informed decision about whether to send a voting information mailer to unlikely voters. Policymakers should be especially interested in these findings because our political system should be inclusive of everyone, and we can see that people are systematically being left out of the democratic process.
+
 
 \newpage
 
@@ -850,6 +864,8 @@ While completing this project provided excellent insight into the voting pattern
 [8] “How to Put Labels over Geom_bar for Each Bar in R with Ggplot2.” Stack Overflow. https://stackoverflow.com/questions/12018499/how-to-put-labels-over-geom-bar-for-each-bar-in-r-with-ggplot2 (November 15, 2020).
 
 [9] Prepared by the Geography Division of the U.S. Census Bureau. “Census Regions and Divisions of the United States.” https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf.
+
+[10] https://www.nytimes.com/2020/10/08/upshot/youth-voting-2020-election.html 
 
 \newpage
 
