@@ -195,7 +195,7 @@ We will begin our EDA by visualizing the relationship between the response varia
 First, we will simply look at the distribution of those who voted throughout the last 8 years of elections.
 
 
-```{r EDA, fig.height=3, fig.width=5}
+```{r EDA, fig.height=3, fig.width=5, fig.align='center'}
 response_plot <- ggplot(data = elections_clean, aes(x = voted, 
                                                     fill = "gainsboro")) +
   geom_bar() +
@@ -220,7 +220,7 @@ From the barplot above, it is clear that more individuals in the data set voted 
 
 Many political nonprofits engage with college campuses, so we want to analyze whether or not being a student influences the frequency of voting. We will explore this in a preliminary analysis by visualizing the distribution of whether school-aged individuals (16-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
 
-```{r EDA1, fig.height=3, fig.width=5}
+```{r EDA1, fig.height=3, fig.width=5, fig.align='center'}
 EDA1 <- elections_clean %>% 
   ggplot(aes(x = voted, fill = current_student)) +
   geom_bar() +
@@ -258,7 +258,7 @@ From the table above, it is apparent that more than 40% of those not currently e
 
 To more meaningfully analyze the relationship between being a student and if they vote or not, we adjusted our visualization to only include those currently enrolled in some level of education. This is seen in the visualization below. 
 
-```{r EDA2, fig.height=3, fig.width=5}
+```{r EDA2, fig.height=3, fig.width=5, fig.align='center'}
 EDA2 <- elections_clean %>% 
   filter(current_student != "Not currently enrolled") %>% 
   ggplot(aes(x = voted, fill = current_student)) +
@@ -278,7 +278,7 @@ EDA2
 
 This visualization shows that respondents between the age 16-24 enrolled in some education at the time were mainly full time college students. More full time and part time college students that were eligible to vote did vote compared to those that did not vote. The opposite is true for high school students: more full time and part time high school students that were eligible to vote did not vote compared to those that did vote. 
 
-```{r EDA3, fig.height=3, fig.width=5}
+```{r EDA3, fig.height=3, fig.width=5, fig.align='center'}
 citizen_plot <- elections_clean %>% 
   group_by(citizen) %>% 
   count(voted) %>% 
@@ -292,7 +292,7 @@ citizen_plot %>%
   #see geom_text() code inspiration in reference [4]*
   facet_grid(cols = vars(citizen))+
   scale_fill_brewer(palette = "Blues") +
-  labs(title = "Voting distribution based on citizenship status", 
+  labs(title = "Voting Distribution Based on Citizenship Status", 
        y = "Proportion", x = "Voted", 
      subtitle = "Examining relationship between citizenship status and voting",
        caption = "0 = Did not Vote, 1 = Voted",
@@ -304,12 +304,12 @@ citizen_plot %>%
 
 This visualization shows that for both native born and naturalized individuals, more citizens that were eligible to vote did vote compared to those that did not vote; however, the proportion is much greater for native born citizens than for naturalized. For a similar plot comparing respondents by veteran status, please consult Appendix A.
 
-```{r EDA4, fig.height=3, fig.width=5}
+```{r EDA4, fig.height=3, fig.width=5, fig.align='center'}
 elections_clean %>% 
   ggplot(aes(x = AGE, y = voted)) +
   geom_boxplot(fill = "gray") +
   coord_flip() +
-  labs(title = "Relationship between age and voting", 
+  labs(title = "Relationship Between Age and Voting", 
        y = "Voting Status", x = "Age", 
        caption = "0 = Did not Vote, 1 = Voted",
        fill = "Citizenship Status")+
@@ -336,7 +336,7 @@ there is a presidential elections versus when there is not. In the future, we
 may decide to add the variable "Election Year" as an interaction term with year
 as a divide between years that fall on an election.
 
-```{r EDA6, fig.height=3, fig.width=4.5}
+```{r EDA6, fig.height=3, fig.width=4.5, fig.align='center'}
 elections_year %>% 
   filter(voted == 1) %>% 
   ggplot(aes(x = YEAR, y = prop_voted)) +
@@ -347,7 +347,7 @@ elections_year %>%
 
 We decided to look at the scatterplot of voter turnout over time broken down by the status of the election (Presidential election, midterm after incumbent president, or midterm after new president) to see how it may differ depending on the election.
 
-```{r scatterplot-over-time, fig.height=3, fig.width=6}
+```{r scatterplot-over-time, fig.height=3, fig.width=6, fig.align='center'}
 elections_year %>% 
   mutate(Election_new = case_when(YEAR %in% c(2004, 2008, 
                                                           2012, 2016) ~ 
