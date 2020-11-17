@@ -113,25 +113,23 @@ elections_clean <- elections %>%
                                       "Govt Office/Public Agency",
                                     VOREGHOW == 4 ~ "School/College/Hospital",
                                     VOREGHOW == 3 ~ "By Mail")) %>% 
-  mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
-                                                          2012, 2016) ~ 
-                                                    "Presidential",
-                                                  YEAR %in% c(2006, 2014) ~ 
-                                       "Midterm Following Incumbent President",
-                                          YEAR %in% c(2010, 2018) ~ 
-                                          "Midterm Following New President"),
-         Presidential_Election_Status = factor(Presidential_Election_Status)) %>% 
-    mutate(Is_Presidential_Election = case_when(YEAR %in% c(2004, 2008, 
-                                                          2012, 2016) ~ 
+  mutate(Election = case_when(YEAR %in% c(2004, 2008, 2012, 2016) ~ 
                                                     "Presidential",
                                                   YEAR %in% c(2006, 2010, 2014, 
                                                               2018) ~ 
-                                       "Non-Presidential"),
-         Is_Presidential_Election = factor(Is_Presidential_Election)) %>% 
+                                                    "Midterm"),
+         Election = factor(Election)) %>% 
+    # mutate(Is_Presidential_Election = case_when(YEAR %in% c(2004, 2008, 
+    #                                                       2012, 2016) ~ 
+    #                                                 "Presidential",
+    #                                               YEAR %in% c(2006, 2010, 2014, 
+    #                                                           2018) ~ 
+    #                                    "Non-Presidential"),
+         # Is_Presidential_Election = factor(Is_Presidential_Election)) %>% 
   select(metro, sex, marst, veteran, citizen, hispanic_status, employed, 
          highest_education, current_student, race, why_not_vote, why_not_reg,
          voting_method, voting_time, voted, registered, how_registered, YEAR,
-         STATEFIP, AGE, Presidential_Election_Status, Is_Presidential_Election)
+         STATEFIP, AGE, Election)
 
 elections_clean <- elections_clean %>% 
   mutate(metro = factor(metro),
@@ -179,9 +177,8 @@ elections_clean <- elections_clean %>%
          race = fct_relevel(race, c("White","Black","Asian or Pacific Islander", 
                                     "Native American", "2 or more races", 
                                     "Other/Unknown")),
-         Presidential_Election_Status = fct_relevel(Presidential_Election_Status, 
-                    c("Presidential", "Midterm Following Incumbent President", 
-                                      "Midterm Following New President")))
+         Election = fct_relevel(Election, 
+                    c("Presidential", "Midterm")))
 ```
 
 # Introduction and Data
@@ -320,7 +317,7 @@ elections_clean %>%
 
 ```
 
-This box plot shows that eligible voters that did vote were generally older than eligible voters that did not vote.
+This box plot shows that eligible voters that did vote were generally older than respondents that did not vote.
 
 We are also interested in looking at how voter turnout has changed over the
 years.
@@ -352,16 +349,16 @@ We decided to look at the scatterplot of voter turnout over time broken down by 
 
 ```{r scatterplot-over-time, fig.height=3, fig.width=6}
 elections_year %>% 
-  mutate(Presidential_Election_Status = case_when(YEAR %in% c(2004, 2008, 
+  mutate(Election_new = case_when(YEAR %in% c(2004, 2008, 
                                                           2012, 2016) ~ 
                                                     "Presidential",
                                                   YEAR %in% c(2006, 2014) ~ 
                                        "Midterm Following Incumbent President",
                                           YEAR %in% c(2010, 2018) ~ 
                                           "Midterm Following New President"),
-        Presidential_Election_Status = factor(Presidential_Election_Status)) %>% 
+        Election_new = factor(Election_new)) %>% 
   filter(voted == 1) %>% 
-  ggplot(aes(x = YEAR, y = prop_voted, color = Presidential_Election_Status)) +
+  ggplot(aes(x = YEAR, y = prop_voted, color = Election_new)) +
   geom_point() +
   labs(title = "Higher Proportion of Voters During Presidential Election Years", 
        y = "Proportion of People Who Voted", x = "Year", 
@@ -397,7 +394,7 @@ int_only_model <- glm(voted ~ 1,
 
 full_model <- glm(voted ~ metro + sex + marst + veteran+ citizen + 
                    hispanic_status + employed + highest_education + 
-                   current_student + race + AGE + Presidential_Election_Status
+                   current_student + race + AGE + Election
                  + YEAR,
                      data = elections_red,
                       family = "binomial")
@@ -412,24 +409,20 @@ tidy(best_model) %>%
   kable(digits = 3, caption = "Model Resulting From Backward Selection")
 ```
 
-The final model included YEAR + sex + current_student + citizen + employed + race + 
-marst + Presidential_Election_Status + AGE + highest_education. 
+The final model included predictor variables for sex, whether someone between ages 16 and 24 is currently enrolled in school, citizenship status, employment status, race,  marital status, whether it was a presidential election year or a midterm election year, respondent age, and the highest education level of the respondent. 
 
-The final model is: 
-
-
-The backward selection based on AIC took out the variables metro, veteran, and hispanic_status (see Appendix B).
+The backward selection based on AIC removed the variables for the year, whether someone is from a metro area, veteran status, and hispanic status (see Appendix B).
 
 Interpretation of coefficients of interest:
 
 Baseline: Female, married, native born, not employed, Bachelors Degree is highest education, not currently enrolled in school if between the age of 16-24, White, and the time of voting is midterm following the election of an incumbent president.
 
 
-We expect the odds of an eligible voter voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of a survey respondent voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
-For each additional year in age, we expect the odds of an eligible voter voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+For each additional year in age, we expect the odds of a survey respondent voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
-We expect the odds of an eligible voter voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of a survey respondent voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
 ## Checking Model Conditions
 
@@ -576,15 +569,15 @@ All of the VIF values are under the threshold of 10 (see table in Appendix C), i
 
 We will add in several interaction terms of interest to us and use a drop-in-deviance test to see if they are meaningful predictors of the odds of someone voting.
 
-The reduced model is the same as the above model titled "Model Resulting From Backward Selection," and the full model is the reduced model plus interactions terms for sex and employment, presidential election status and highest education level, age and presidential election status, sex and presidential election status, and race and presidential election status.
+The reduced model is the same as the above model titled "Model Resulting From Backward Selection," and the full model is the reduced model plus interactions terms for sex and employment, election type and highest education level, sex and election type, and race and election type.
 
 The following hypotheses will be used:
 
-$H_0$: the coefficients for the interaction between sex and employment, presidential election status and highest education level, age and presidential election status, sex and presidential election status, and race and presidential election status are all zero
+$H_0$: the coefficients for the interaction between sex and employment, election type and highest education level, sex and election type, and race and election type are all zero
 
 $H_0:$
 
-$\beta_{sex*employed} = \beta_{Presidential-Election-Status*highest_education} = \beta_{AGE*Presidential-Election-Status} = \beta_{sex*Presidential-Election-Status} = \beta_{race*Presidential-Election-Status} = 0$
+$\beta_{sex*employed} = \beta_{Election*highest_education} = \beta_{sex*Election} = \beta_{race*Election} = 0$
 
 $H_a$: at least one of these coefficients for the interaction terms $\neq$ zero
 
@@ -593,13 +586,12 @@ $\alpha = 0.05$
 ```{r interaction}
 reduced_model <- best_model
 
-full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
-                    race + marst + Presidential_Election_Status + AGE + 
+full_model <- glm(voted ~ sex + current_student + citizen + employed + 
+                    race + marst + Election + AGE + 
                     highest_education +
-                    Presidential_Election_Status*highest_education + 
-                    AGE*Presidential_Election_Status + 
-                    sex*Presidential_Election_Status + 
-                    race*Presidential_Election_Status,
+                    Election*highest_education + 
+                    sex*Election + 
+                    race*Election,
                      data = elections_red,
                       family = "binomial")
 ```
@@ -641,13 +633,12 @@ following the election of an incumbent president
 ```{r resulting-model}
 reduced_model <- best_model
 
-full_model <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
-                    race + marst + Is_Presidential_Election + AGE + 
+full_model <- glm(voted ~ sex + current_student + citizen + employed + 
+                    race + marst + Election + AGE + 
                     highest_education +
-                    Presidential_Election_Status*highest_education + 
-                    AGE*Presidential_Election_Status + 
-                    sex*Presidential_Election_Status + 
-                    race*Presidential_Election_Status,
+                    Election*highest_education + 
+                    sex*Election + 
+                    race*Election,
                      data = elections_red,
                       family = "binomial")
 ```
@@ -657,7 +648,7 @@ meaningful predictor of the odds of someone voting.
 
 The following hypotheses will be used:
 
-$H_0$: the coefficients for the main effect for sex, the interaction between sex and employment, and sex and presidential election status are all zero. All of the coefficients associated with sex are equal to zero.
+$H_0$: the coefficients for the main effect for sex, the interaction between sex and employment, and sex and election type are all zero. All of the coefficients associated with sex are equal to zero.
 
 $H_0:$ $\beta_{sex} =\beta_{sex*employed} = \beta_{sex*Presidential-Election-Status} = 0$
 $H_a$: at least one of these coefficients for the coefficients associated with sex $\neq$ zero
@@ -665,22 +656,20 @@ $H_a$: at least one of these coefficients for the coefficients associated with s
 $\alpha = 0.05$
 
 ```{r model-with-sex}
-sex_included <- glm(voted ~ YEAR + sex + current_student + citizen + employed + 
-                    race + marst + Is_Presidential_Election + AGE + 
+sex_included <- glm(voted ~ sex + current_student + citizen + employed + 
+                    race + marst + Election + AGE + 
                     highest_education +
-                    Presidential_Election_Status*highest_education + 
-                    AGE*Presidential_Election_Status + 
-                    sex*Presidential_Election_Status + 
-                    race*Presidential_Election_Status,
+                    Election*highest_education + 
+                    sex*Election + 
+                    race*Election,
                      data = elections_red,
                       family = "binomial")
 
-sex_excluded <- glm(voted ~ YEAR + current_student + citizen + employed + 
-                    race + marst + Is_Presidential_Election + AGE + 
+sex_excluded <- glm(voted ~ current_student + citizen + employed + 
+                    race + marst + Election + AGE + 
                     highest_education +
-                    Presidential_Election_Status*highest_education + 
-                    AGE*Presidential_Election_Status + 
-                    race*Presidential_Election_Status,
+                    Election*highest_education + 
+                    race*Election,
                      data = elections_red,
                       family = "binomial")
 ```
@@ -692,7 +681,7 @@ anova(sex_excluded, sex_included, test = "Chisq") %>%
   kable(digits = 3, caption = "Drop-In-Deviance Test Results For Sex")
 ```
 
-From the drop-in-deviance test to include variable sex, the p-value (0.267) is greater than an alpha-level of 0.10, so we will exclude the main effect for sex and the interaction terms including sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
+From the drop-in-deviance test to include variable sex, the p-value (0.138) is greater than an alpha-level of 0.10, so we will exclude the main effect for sex and the interaction terms including sex from the model. This contradicts the model output from the backward selection, which is most likely due their different criteria for statistical significance. Backward selection makes decisions based on the AIC, while the drop-in-deviance test uses the p-value. A potential discrepancy between the two values may have resulted in the different determinations of the significance of sex. We have chosen to use the results of the drop-in-deviance test, and therefore, will be excluding sex from the final model.
 
 # Results
 
@@ -739,7 +728,7 @@ vif(voting_model) %>%
   kable(digits = 3)
 ```
 
-All of the VIF values are under the threshold of 10 (see Appendix D), indicating that there is no evidence of multicollinearity in our final model.
+All of the VIF values are under the threshold of 10 (see table in Appendix D), indicating that there is no evidence of multicollinearity in our data.
 
 ## Creating Classifier
 
@@ -765,21 +754,22 @@ autoplot(roc_curve_data)
 ```
 
 Below we look at values within a range of thresholds in order to choose the 
-threshold that yields high sensitivity and low values of (1 - specificity).
+threshold that yields high sensitivity and low values of the false positive rate (1 - specificity).
 
 ```{r roc-curve-threshold}
+roc_curve_data <- roc_curve_data %>%
+  mutate(false_pos_rate = (1 - specificity))
 roc_curve_data %>%
-  filter(.threshold > .419, .threshold < .42) %>% 
+  filter(.threshold > .715, .threshold < .716) %>% 
   kable(digits = 3, caption = "ROC Curve Threshold Table")
 ```
 
-According to our ROC curve and modeling objectives, we will choose a threshold
-of .42 because we want to lean towards having a higher false negative rate
-(type II error) than a false positive rate as it does not hurt to mail a
-few extra ballots to people who may already be planning to vote.
+According to our ROC curve and modeling objectives, we will choose a threshold of 0.716 because we want to prioritize having a lower false positive rate (and avoid making a type I error) than having higher true positive rate, or sensitivity, as it does not hurt to mail a few extra mailers to people who may already be planning to vote. Because our decision will be to not send a mailer if the predicted probability is greater than the threshold, we want to be sure that we are not inaccurately predicting someone to vote when they truly will not, which means that we want to minimize our false positive rate.
 
-Any data point with a probability over 0.60 will be predicted to be in
-the "voted" category.
+At this threshold, we have a sensitivity of about 0.602, which means that our model prediction will correctly identify about 60% of people who will vote. In other words, using this threshold, of the people who will actually vote, we will capture about 60.2% of them. Our false positive rate is 0.213, which means that with our current threshold, we are predicting "yes" for about 21.3% of people who will actually not vote.  
+
+Any data point with a probability over 0.716 will be predicted to be in
+the "voted" category and will therefore not be sent a mailer.
 
 
 # Discussion 
@@ -847,8 +837,7 @@ int_only_model <- glm(voted ~ 1,
 
 full_model <- glm(voted ~ metro + sex + marst + veteran+ citizen + 
                    hispanic_status + employed + highest_education + 
-                   current_student + race + AGE + Presidential_Election_Status
-                 + YEAR,
+                   current_student + race + AGE + Election,
                      data = elections_red,
                       family = "binomial")
 
