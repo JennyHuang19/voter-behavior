@@ -648,7 +648,7 @@ missclassification %>%
   kable(digits = 3, caption = "Missclassification Rates by Region")
 ```
 
-*Consulted Census data for the region fips number corresponding to region name [9]*
+*Consulted Census data for the region FIPS number corresponding to region name [9]*
 
 Based on the misclassification rates by region, we have no reason to believe that the independence condition is not satisfied. The misclassification rates across regions are relatively similar and do not differ systematically between regions, which suggests that there is not an issue of spatial correlation. Because we were only concerned about independence in the spatial relationship between observations, we conclude that the independence condition is satisfied for our model.
 
@@ -680,7 +680,7 @@ According to the Cook's Distance plot for the final model (see Appendix D), ther
 
 All of the VIF values are under the threshold of 10 (see the VIF table in Appendix D), indicating that there is no evidence of multicollinearity in our data.
 
-## Creating Classifier
+## Creating a Classifier
 
 After creating our final model, we created a classifier for predicting whether an individual would be likely to vote with a goal of deciding whether or not an organization should send a voting mailer encouraging the person to vote. Through creating an ROC curve, we were able to choose a threshold that maximized sensitivity while also minimizing the false positive rate (1-specificity), keeping in mind that we aim to prioritize having a lower false positive rate than a higher sensitivity value, since it does not hurt to mail a few extra informational mailers to people who may already be planning to vote.
 
@@ -701,10 +701,10 @@ roc_curve_data <- voting_aug %>%
   mutate(pred_prob = exp(.threshold)/(1 + exp(.threshold)))
 ```
 
-**ROC Curve For Final Model**
 
-```{r roc-curve-plot, fig.height=5, fig.width=3}
-autoplot(roc_curve_data, title = "ROC Curve For Final Model")
+```{r roc-curve-plot, fig.height=3, fig.width=3, fig.align="center"}
+autoplot(roc_curve_data) +
+  labs(title = "ROC Curve For Final Model")
 ```
 
 In the table below, we look at values within a range of thresholds in order to choose the 
@@ -863,6 +863,8 @@ emplogitplot1(voted ~ AGE, data = elections_red,
 ```
 
 *Consulted reference [11] for the code to add the title to the empirical logit plot*
+
+\newpage
 
 ### Independence
 
