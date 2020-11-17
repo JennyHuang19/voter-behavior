@@ -373,6 +373,20 @@ After analyzing these preliminary visualizations and observations, we will now b
 
 # Methodology
 
+The data set was originally coded with different numerical values which would 
+have made analysis difficult. Therefore, we recoded the data to make it more 
+intelligible by using the codebook provided with the data download on 
+Google Drive. [7] This was done in the data cleaning code section above, 
+recoding the numerical values into string identifiers or binary numerical 
+identifiers. The new dataset, `elections_clean`, is too large to load into the 
+data folder and push to github, so we have included the raw dataset in the data
+folder, and the cleaned dataset can be attained by running the above code. 
+
+The primary response variables of our regression analysis will be `voted` . 
+`voted` is a categorical variable that identifies whether or not a respondent
+voted in the most recent November election [8]. Hence, we used a logistic 
+regression model for the binary response.
+
 ## Model Selection 
 
 **Select a random subset of the data to create model.**
@@ -384,6 +398,8 @@ set.seed(6687)
 elections_red <- elections_clean %>%
   sample_n(10000)
 ```
+
+As we were interested in looking at variables that may help explain voter turnout, we started by considering all relevant predictor variables [8]. We considered started with a full model including sex, age, marital status, veteran status, citizenship status (native born or naturalized citizen), whether or not someone is Hispanic or Latinx, employment status, whether someone lives in a metropolitan area, highest education level attained, whether someone is a current student, and race.
 
 Using the random sample of 10,000 observations, we began the model selection process. See Appendix B for the full backward selection model output.
 
@@ -414,9 +430,6 @@ The final model included predictor variables for sex, whether someone between ag
 The backward selection based on AIC removed the variables for the year, whether someone is from a metro area, veteran status, and hispanic status (see Appendix B).
 
 Interpretation of coefficients of interest:
-
-Baseline: Female, married, native born, not employed, Bachelors Degree is highest education, not currently enrolled in school if between the age of 16-24, White, and the time of voting is midterm following the election of an incumbent president.
-
 
 We expect the odds of a survey respondent voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
 
@@ -703,7 +716,8 @@ final_best_aug <- augment(voting_model) %>%
 
 **Cook's distance**
 
-We will also look for influential points in our final model using Cook's Distance.
+We will also look for influential points in our final model using Cook's
+Distance.
 
 ```{r Cooks-final, fig.height=3, fig.width=6, include=FALSE}
 ## scatterplot of Cook's D vs. observation number
@@ -715,7 +729,8 @@ ggplot(data = final_best_aug, aes(x = obs_num, y = .cooksd)) +
                            as.character(obs_num), "")), nudge_x = 1)
 ```
 
-According to the Cook's Distance plot for the final model (see Appendix D), there are no influential points, so all points can be left in the final model.
+According to the Cook's Distance plot for the final model (see Appendix D),
+there are no influential points, so all points can be left in the final model.
 
 **Multicollinearity**
 
@@ -728,9 +743,18 @@ vif(voting_model) %>%
   kable(digits = 3)
 ```
 
-All of the VIF values are under the threshold of 10 (see table in Appendix D), indicating that there is no evidence of multicollinearity in our data.
+All of the VIF values are under the threshold of 10 (see table in Appendix D),
+indicating that there is no evidence of multicollinearity in our data.
 
 ## Creating Classifier
+
+After creating our final model, we created a classifier for predicting whether
+an individual would be likely to vote with a goal of deciding whether or not an
+organization should send a voting mailer encouraging the person to vote. Through
+creating an ROC curve, we were able to choose a threshold that maximized
+sensitivity and specificity, keeping in mind that we would rather have a higher
+false negative rate (type II error) than a false positive rate since it does not
+hurt to mail a few extra flyers to people who may already be planning to vote.
 
 We'll fit an ROC curve to help us determine a decision-making threshold. 
 
@@ -754,7 +778,8 @@ autoplot(roc_curve_data)
 ```
 
 Below we look at values within a range of thresholds in order to choose the 
-threshold that yields high sensitivity and low values of the false positive rate (1 - specificity).
+threshold that yields high sensitivity and low values of the false positive 
+rate (1 - specificity).
 
 ```{r roc-curve-threshold}
 roc_curve_data <- roc_curve_data %>%
@@ -764,9 +789,21 @@ roc_curve_data %>%
   kable(digits = 3, caption = "ROC Curve Threshold Table")
 ```
 
-According to our ROC curve and modeling objectives, we will choose a threshold of 0.716 because we want to prioritize having a lower false positive rate (and avoid making a type I error) than having higher true positive rate, or sensitivity, as it does not hurt to mail a few extra mailers to people who may already be planning to vote. Because our decision will be to not send a mailer if the predicted probability is greater than the threshold, we want to be sure that we are not inaccurately predicting someone to vote when they truly will not, which means that we want to minimize our false positive rate.
+According to our ROC curve and modeling objectives, we will choose a threshold
+of 0.716 because we want to prioritize having a lower false positive rate
+(and avoid making a type I error) than having higher true positive rate,
+or sensitivity, as it does not hurt to mail a few extra mailers to people who 
+may already be planning to vote. Because our decision will be to not send
+a mailer if the predicted probability is greater than the threshold, we want
+to be sure that we are not inaccurately predicting someone to vote when they
+truly will not, which means that we want to minimize our false positive rate.
 
-At this threshold, we have a sensitivity of about 0.602, which means that our model prediction will correctly identify about 60% of people who will vote. In other words, using this threshold, of the people who will actually vote, we will capture about 60.2% of them. Our false positive rate is 0.213, which means that with our current threshold, we are predicting "yes" for about 21.3% of people who will actually not vote.  
+At this threshold, we have a sensitivity of about 0.602, which means that our
+model prediction will correctly identify about 60% of people who will vote.
+In other words, using this threshold, of the people who will actually vote,
+we will capture about 60.2% of them. Our false positive rate is 0.213, which
+means that with our current threshold, we are predicting "yes" for about 21.3%
+of people who will actually not vote.  
 
 Any data point with a probability over 0.716 will be predicted to be in
 the "voted" category and will therefore not be sent a mailer.
