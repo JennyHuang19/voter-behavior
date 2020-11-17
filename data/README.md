@@ -18,7 +18,7 @@ Based on information found in the 2020 Fall Data Challenge codebook [1].
 * `hispanic_status`: binary variable for whether a respondent is Hispanic
 * `employed`: binary variable for whether the respondent is employed 
 * `highest_education`: respondent's highest level of formal education achieved 
-* `current_student`: enrollment status (full- or part-time) of respondents age 16 to 24 during the previous week
+* `current_student`: enrollment status (full- or part-time) of respondents age 18 to 24 during the previous week
 * `race`: responent race
 * `voting_method`: respondent's method of voting (in-person or mail-in)
 * `voting_time`: whether a respondent voted early or on election day
