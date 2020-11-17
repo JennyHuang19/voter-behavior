@@ -28,4 +28,5 @@ Based on information found in the 2020 Fall Data Challenge codebook [1].
 * `Election`: type of election 
   + Presidential Election or Midterm Election
 
-[1] https://thisisstatistics.org/wp-content/uploads/2020/09/2020-Fall-Data-Challenge-DatasetFAQ-PDF.pdf 
+[1] American Statistical Association. “ASA’s 2020 Fall Data Challenge: Get Out the Vote! Challenge Dataset FAQ,” n.d. https://thisisstatistics.org/wp-content/uploads/2020/09/2020-Fall-Data-Challenge-DatasetFAQ-PDF.pdf.
+ 

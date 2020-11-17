@@ -19,8 +19,9 @@ distribute mailers to encourage people to vote, with the goal of minimizing
 wasted resources by only sending mailers to the people who are not likely to 
 vote using a decision threshold based on our final model.
 
-[1] https://ipums.org/what-is-ipums
+[1] The University of Minnesota. “What Is IPUMS?” Text. IPUMS, February 7, 2019. https://ipums.org/what-is-ipums.
 
-[2] https://thisisstatistics.org/falldatachallenge/  
+[2] American Statistical Association. “Fall Data Challenge: Get Out the Vote!” This Is Statistics. Accessed November 17, 2020. https://thisisstatistics.org/falldatachallenge/.
 
-[3] https://thisisstatistics.org/wp-content/uploads/2020/09/2020-Fall-Data-Challenge-DatasetFAQ-PDF.pdf 
+[3] American Statistical Association. “ASA’s 2020 Fall Data Challenge: Get Out the Vote! Challenge Dataset FAQ,” n.d. https://thisisstatistics.org/wp-content/uploads/2020/09/2020-Fall-Data-Challenge-DatasetFAQ-PDF.pdf.
+ 
