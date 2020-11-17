@@ -216,9 +216,9 @@ response_plot
 *see theme code inspiration at reference [6]*
 *see scale fill code inspiration at reference [7]*
 
-From the barplot above, it is clear the more individuals in the data set voted (voted = 1) than did not (voted = 0).
+From the barplot above, it is clear that more individuals in the data set voted (voted = 1) than did not (voted = 0).
 
-Many political nonprofits engage with college campuses, so we want to analyze whether or not being a student influences the frequency of voting. We will explore this preliminarily by visualizing the distribution of if school aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
+Many political nonprofits engage with college campuses, so we want to analyze whether or not being a student influences the frequency of voting. We will explore this in a preliminary analysis by visualizing the distribution of whether school-aged individuals (18-24) voted or not -- categorized by their current student level. This is seen in the bar plot below.
 
 ```{r EDA1, fig.height=3, fig.width=5}
 EDA1 <- elections_clean %>% 
@@ -240,7 +240,7 @@ EDA1
 
 *see scale fill brewer code inspiration from reference [6]*
 
-From the bar plot, it is evident that a majority of these individuals were not currently enrolled. This may be a result of a general national trend, but we want to investigate if it is the result of a larger proportion of older individuals within in the range of ages between 16-24. We will investigate this by analyzing those who are not currently enrolled in school within this age range.
+From the bar plot, it is evident that a majority of these individuals were not currently enrolled. This may be a result of a general national trend, but we want to investigate if it is the result of a larger proportion of older individuals (aged 23-24) within in the range of ages between 16-24. We will investigate this by analyzing those who are not currently enrolled in school within this age range.
 
 ```{r age-distribution-college-aged}
 elections_clean %>%
@@ -367,20 +367,20 @@ elections_year %>%
 
 From the above scatterplot, we confirmed that there is higher voter turnout during presidential elections compared to midterm elections. In addition, there is equal or higher voter turnout for midterm elections following the election of a new president compared to midterm elections following the election of an incumbent president, and an especially high voter turnout in the midterm election after Trump's election in 2016.
 
-Finally, it is important to acknowledge that our any missingness in our data, as it may influence the outcome of our regression analysis. The initial data sourced from the This Is Statistics: Fall Data Challenge used non-uniform values for the different variables, therefore we cleaned the data to be more intelligible for our analysis. While cleaning, we did impute "NA" values by either combining them with other categories and/or removing them to improve our analysis. We believe this will not negatively affect out analysis, yet will move forward taking it into consideration. 
+Finally, it is important to acknowledge the missingness in our data, as it may influence the outcome of our regression analysis. The initial data sourced from the "This Is Statistics: Fall Data Challenge" used non-uniform values for the different variables, therefore we cleaned the data to be more intelligible for our analysis. While cleaning, we did impute "NA" values by either combining them with other categories and/or removing them to improve our analysis. We believe this will not negatively affect our analysis, yet we will move forward taking it into consideration. 
 
 After analyzing these preliminary visualizations and observations, we will now begin to build our model. 
 
 # Methodology
 
 The data set was originally coded with different numerical values which would 
-have made analysis difficult. Therefore, we recoded the data to make it more 
+have made analysis difficult. Therefore, we re-coded the data to make it more 
 intelligible by using the codebook provided with the data download on 
 Google Drive. [7] This was done in the data cleaning code section above, 
-recoding the numerical values into string identifiers or binary numerical 
+re-coding the numerical values into string identifiers or binary numerical 
 identifiers. The new dataset, `elections_clean`, is too large to load into the 
-data folder and push to github, so we have included the raw dataset in the data
-folder, and the cleaned dataset can be attained by running the above code. 
+data folder and push to github, so we have included the raw data-set in the data
+folder, and the cleaned data-set can be attained by running the above code. 
 
 The primary response variables of our regression analysis will be `voted` . 
 `voted` is a categorical variable that identifies whether or not a respondent
@@ -399,7 +399,7 @@ elections_red <- elections_clean %>%
   sample_n(10000)
 ```
 
-As we were interested in looking at variables that may help explain voter turnout, we started by considering all relevant predictor variables [8]. We considered started with a full model including sex, age, marital status, veteran status, citizenship status (native born or naturalized citizen), whether or not someone is Hispanic or Latinx, employment status, whether someone lives in a metropolitan area, highest education level attained, whether someone is a current student, and race.
+As we were interested in looking at variables that may help explain voter turnout, we started by considering all relevant predictor variables [8]. We considered started with a full model including sex, age, whether it was a Midterm or presidential election year, the year of the election, marital status, veteran status, citizenship status (native born or naturalized citizen), whether or not someone is Hispanic or Latinx, employment status, whether someone lives in a metropolitan area, highest education level attained, whether someone is a current student, and race.
 
 Using the random sample of 10,000 observations, we began the model selection process. See Appendix B for the full backward selection model output.
 
@@ -431,11 +431,13 @@ The backward selection based on AIC removed the variables for the year, whether 
 
 Interpretation of coefficients of interest:
 
-We expect the odds of a survey respondent voting for a divorced/separated eligible voter to be 0.50 (exp(-0.702)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of a survey respondent voting for a divorced/separated eligible voter to be 0.4951 (exp(-0.703)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election, after factoring in all other voter characteristics/information. 
 
-For each additional year in age, we expect the odds of a survey respondent voting  to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+For each additional year in age, we expect the odds of a survey respondent voting to be 1.04 (exp(0.040)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election, after factoring in all other voter characteristics/information. 
 
-We expect the odds of a survey respondent voting when it is a presidential election year to be 2.689 (exp(0.989)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education,  not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election following the election of an incumbent president, after factoring in all other voter characteristics/information. 
+We expect the odds of a survey respondent voting who's highest level of education is high school to be 0.1082	(exp(-2.224)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education, not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election, after factoring in all other voter characteristics/information. 
+
+We expect the odds of a survey respondent who is employed to be 1.499 (exp(0.405)) times the odds of individuals that are female, married, native born, not employed, have Bachelors Degree as their highest education, not currently enrolled in school if between the age of 16-24, White, and the election is a midterm election, after factoring in all other voter characteristics/information. 
 
 ## Checking Model Conditions
 
@@ -607,6 +609,9 @@ full_model <- glm(voted ~ sex + current_student + citizen + employed +
                     race*Election,
                      data = elections_red,
                       family = "binomial")
+
+tidy(full_model) %>% 
+  kable(digits = 3, caption = "Model Including Interaction Terms")
 ```
 
 ```{r drop-in-deviance1}
@@ -616,31 +621,39 @@ anova(reduced_model, full_model, test = "Chisq") %>%
         caption = "Drop-In-Deviance Test Results For Interaction Terms")
 ```
 
-The p-value (7.840e-07) is very small (less than the alpha level 0.05), 
+The p-value (approximately 0) is very small (less than the alpha level 0.01), 
 so we can reject the null hypothesis. Thus, we conclude that the data provide 
-sufficient evidence that the coefficients associated with the additional 
+sufficient evidence that at least one of the coefficients associated with the additional 
 interaction terms are not equal to 0. Therefore, we should add them to the model.
 
 Significant interaction terms:
-The effect of the election being a presidential election for an individual with
-the highest level of education as a High School Degree/GED is significant with
-a p-value of 0.011 assuming an alpha level of 0.05. The coefficient is negative,
-indicating that this effect would mean that during a presidential election for
+The effect of the election being a midterm election for an individual with
+the highest level of education as High School Degree/GED proves to be significant with
+a p-value of 0.002 assuming an alpha level of 0.01. The coefficient (0.474) is positive,
+indicating that this effect would mean that during a midterm election for
 an individual with the highest level of education as a High School Degree/GED,
-they are less likely to vote than individuals that are female, married, native
+they are more likely to vote than individuals that are female, married, native
 born, not employed, have Bachelors Degree as their highest education, 
 not currently enrolled in school if between the age of 16-24, White, and 
-the election is a midterm election following the election of an incumbent 
-president.
+the election is a presidential election.
 
-The effect of the election being a presidential election for an individual that
-is Black is significant with a p-value of 0.013 assuming an alpha level of 0.05.
-The coefficient is positive, indicating that this effect would mean that during
-a presidential election for an individual that is Black, they are more likely to
+The effect of the election being a midterm election for an individual that
+is Black is significant with a p-value of 0.004 assuming an alpha level of 0.01.
+The coefficient is negative (-0.498), indicating that this effect would mean that during
+a presidential election for an individual that is Black, they are less likely to
 vote than individuals that are female, married, native born, not employed, have
 Bachelors Degree as their highest education,  not currently enrolled in school
-if between the age of 16-24, White, and the election is a midterm election
-following the election of an incumbent president
+if between the age of 16-24, White, and the election is a presidential election.
+
+The effect of the election being a midterm election for an individual with
+the highest level of education as a Masters Degree proves to be significant with
+a p-value of 0.009 assuming an alpha level of 0.01. The coefficient (0.618) is positive,
+indicating that this effect would mean that during a midterm election for
+an individual with the highest level of education as a Master's Degree,
+they are more likely to vote than individuals that are female, married, native
+born, not employed, have Bachelors Degree as their highest education, 
+not currently enrolled in school if between the age of 16-24, White, and 
+the election is a presidential election.
 
 
 ```{r resulting-model}
@@ -704,6 +717,9 @@ voting_model <- sex_excluded
 tidy(voting_model) %>%
   kable(digits=3, caption = "Final Model Output")
 ```
+Variables of interest:
+###What is baseline with interaction terms
+
 
 ## Checking Model Conditions for Final Model
 
@@ -789,7 +805,7 @@ roc_curve_data %>%
   kable(digits = 3, caption = "ROC Curve Threshold Table")
 ```
 
-According to our ROC curve and modeling objectives, we will choose a threshold
+In reference to our ROC curve and modeling objectives, we will choose a threshold
 of 0.716 because we want to prioritize having a lower false positive rate
 (and avoid making a type I error) than having higher true positive rate,
 or sensitivity, as it does not hurt to mail a few extra mailers to people who 
